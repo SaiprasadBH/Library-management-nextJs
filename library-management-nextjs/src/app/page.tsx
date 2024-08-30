@@ -10,8 +10,22 @@ import { Avatar } from "@/app/components/ui/avatar";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
 import { BookIcon, MenuIcon, ReceiptIcon } from "lucide-react";
+import { fetchAllBooks } from "@/lib/actions";
+import { BookCard } from "./components/ui/book-card";
+import { IBook } from "@/lib/definitions";
+import { Input } from "./components/ui/input";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "./components/ui/pagination";
 
-export default function Page() {
+export default async function Page() {
+  const allBooks: IBook[] = await fetchAllBooks();
   return (
     <div className="flex flex-col min-h-[100dvh]">
       <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center justify-between md:px-8 lg:px-10">
@@ -19,9 +33,14 @@ export default function Page() {
           Library Management
         </Link>
         <nav className="flex items-center gap-4 md:gap-6 lg:gap-8">
+          <Input
+            type="search"
+            placeholder="Search books..."
+            className="bg-muted text-foreground rounded-md px-8 py-2 w-full"
+          />
           <div className="hidden sm:block">
             <Link
-              href="#"
+              href="/login"
               className="text-sm font-medium hover:underline"
               prefetch={false}
             >
@@ -30,7 +49,7 @@ export default function Page() {
           </div>
           <div className="hidden sm:block">
             <Link
-              href="#"
+              href="/register"
               className="text-sm font-medium hover:underline"
               prefetch={false}
             >
@@ -126,6 +145,13 @@ export default function Page() {
             All Books
           </h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {allBooks.map((book) => (
+              <BookCard
+                key={book.title}
+                title={book.title}
+                author={book.author}
+              />
+            ))}
             <Card className="h-full">
               <CardContent className="p-4 flex flex-col justify-between h-full">
                 <div>
@@ -230,6 +256,32 @@ export default function Page() {
                 <Button className="mt-4 md:mt-6 lg:mt-8">Borrow</Button>
               </CardContent>
             </Card>
+          </div>
+          <div className="mt-8 flex justify-center">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious href="#" />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink href="#">1</PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink href="#" isActive>
+                    2
+                  </PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink href="#">3</PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext href="#" />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
         </div>
       </main>
