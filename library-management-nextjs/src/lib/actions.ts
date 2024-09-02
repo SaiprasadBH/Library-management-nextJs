@@ -6,28 +6,19 @@ import {
   members,
 } from "./database/drizzle-orm/drizzleMysqlAdapter";
 import { IMemberBase } from "./definitions";
-import { MemberBaseSchema } from "./database/zod/member.schema";
+import { IMember, MemberBaseSchema } from "./database/zod/member.schema";
 import { hashPassword } from "./hashing/passwordHashing";
 import { eq } from "drizzle-orm";
+import { MemberRepository } from "./repositories/member.repository";
+import { BookRepository } from "./repositories/book.repository";
+
+export const memberRepo = new MemberRepository(drizzleAdapter);
+export const bookRepo = new BookRepository(drizzleAdapter);
 
 export async function fetchAllBooks() {
   const dbConnection = await drizzleAdapter.getPoolConnection();
   const booksArray = dbConnection.select().from(books);
   return booksArray;
-}
-
-export async function CreateUser(user: IMemberBase) {
-  const dbConnection = await drizzleAdapter.getPoolConnection();
-  const [createdUser] = await dbConnection.insert(members).values(user);
-  return createdUser;
-}
-export async function getUserByEmail(email: string) {
-  const dbConnection = await drizzleAdapter.getPoolConnection();
-  const user = await dbConnection
-    .select()
-    .from(members)
-    .where(eq(members.email, email));
-  return user;
 }
 
 export async function login(prevState: any, formData: FormData) {
@@ -44,17 +35,10 @@ export async function registerUser(prevState: any, formData: FormData) {
     role: formData.get("role") as "user" | "admin",
   };
 
-  console.log("user:", user);
-
   try {
     const validatedUser: IMemberBase = MemberBaseSchema.parse(user);
-    console.log("validated User", validatedUser);
-    const userInDatabase = await getUserByEmail(validatedUser.email);
-    console.log("user in database", userInDatabase);
-    if (
-      userInDatabase.length > 0 &&
-      userInDatabase[0].email === validatedUser.email
-    ) {
+    const userInDatabase = await memberRepo.getByEmail(validatedUser.email);
+    if (userInDatabase && userInDatabase.email === validatedUser.email) {
       throw new Error("User already exists");
     }
     const hashedPassword = await hashPassword(validatedUser.password);
@@ -63,7 +47,7 @@ export async function registerUser(prevState: any, formData: FormData) {
       password: hashedPassword,
     };
     console.log(validatedUserWithHashedPassword);
-    const response = await CreateUser(
+    const response = await memberRepo.create(
       validatedUserWithHashedPassword as IMemberBase
     );
     console.log(response);
@@ -79,7 +63,6 @@ export async function registerUser(prevState: any, formData: FormData) {
     } else if ((error as Error).message) {
       return { error: `${(error as Error).message}` };
     }
-    console.error(error);
 
     return { error: "An unexpected error occurred" };
   }

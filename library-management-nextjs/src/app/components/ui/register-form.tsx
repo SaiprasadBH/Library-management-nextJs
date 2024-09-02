@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { IMemberBase } from "@/lib/definitions";
 import { MemberBaseSchema } from "@/lib/database/zod/member.schema";
 import { ZodError } from "zod";
-import { CreateUser, registerUser } from "@/lib/actions";
+import { registerUser } from "@/lib/actions";
 import { Alert, AlertDescription } from "./alert";
 import { AlertCircle } from "lucide-react";
 

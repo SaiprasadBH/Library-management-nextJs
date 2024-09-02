@@ -1,6 +1,6 @@
 import { drizzle, MySql2Database } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
-import { AppEnvs } from "../../read-env";
+import { AppEnvs } from "../../core/read-env";
 import { members, books, transactions } from "./schema";
 
 export interface IDrizzleAdapter {

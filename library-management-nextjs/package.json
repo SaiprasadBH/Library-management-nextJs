@@ -12,6 +12,7 @@
     "migrate": "ts-node ./src/lib/database/drizzle-orm/migration.ts"
   },
   "dependencies": {
+    "@heroicons/react": "^2.1.5",
     "@radix-ui/react-avatar": "^1.1.0",
     "@radix-ui/react-dropdown-menu": "^2.1.1",
     "@radix-ui/react-label": "^2.1.0",
@@ -23,6 +24,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.33.0",
+    "heroicons": "^2.1.5",
     "lucide-react": "^0.436.0",
     "mysql2": "^3.11.0",
     "next": "^15.0.0-canary.135",
@@ -31,6 +33,7 @@
     "react-dom": "^19.0.0-rc-a19a8ab4-20240829",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
+    "use-debounce": "^10.0.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {
