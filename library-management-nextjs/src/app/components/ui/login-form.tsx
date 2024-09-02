@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useActionState } from "react";
 import {
   Card,
   CardHeader,
@@ -12,17 +12,15 @@ import { Label } from "./label";
 import { Input } from "./input";
 import { Button } from "./button";
 import Link from "next/link";
+import { login } from "@/lib/actions";
 
 export default function Component() {
+  const initialState = { success: false, error: "" };
+  const [state, formAction] = useActionState(login, initialState);
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            // Add your form submission logic here
-          }}
-        >
+        <form action={formAction}>
           <CardHeader>
             <CardTitle className="text-2xl">Welcome back</CardTitle>
             <CardDescription>

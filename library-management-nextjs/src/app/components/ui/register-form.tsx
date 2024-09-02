@@ -78,9 +78,8 @@ export default function RegisterForm() {
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
               <select name="role">
-                <option value="">Select a role</option>
-                <option value="admin">admin</option>
                 <option value="user">user</option>
+                <option value="admin">admin</option>
               </select>
             </div>
           </CardContent>
