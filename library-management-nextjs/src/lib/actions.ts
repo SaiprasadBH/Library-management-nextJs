@@ -5,15 +5,19 @@ import {
   books,
   members,
 } from "./database/drizzle-orm/drizzleMysqlAdapter";
-import { IMemberBase } from "./definitions";
+import { IBook, IMemberBase } from "./definitions";
 import { IMember, MemberBaseSchema } from "./database/zod/member.schema";
 import { hashPassword } from "./hashing/passwordHashing";
 import { eq } from "drizzle-orm";
 import { MemberRepository } from "./repositories/member.repository";
 import { BookRepository } from "./repositories/book.repository";
+import { signIn } from "@/auth";
+import { AuthError } from "next-auth";
+import { IPagedResponse, IPageRequest } from "./core/pagination";
+import { redirect } from "next/navigation";
 
-export const memberRepo = new MemberRepository(drizzleAdapter);
-export const bookRepo = new BookRepository(drizzleAdapter);
+const memberRepo = new MemberRepository(drizzleAdapter);
+const bookRepo = new BookRepository(drizzleAdapter);
 
 export async function fetchAllBooks() {
   const dbConnection = await drizzleAdapter.getPoolConnection();
@@ -21,8 +25,23 @@ export async function fetchAllBooks() {
   return booksArray;
 }
 
-export async function login(prevState: any, formData: FormData) {
-  return { success: true };
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData
+) {
+  try {
+    await signIn("credentials", formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case "CredentialsSignin":
+          return "Invalid credentials.";
+        default:
+          return "Something went wrong.";
+      }
+    }
+    throw error;
+  }
 }
 
 export async function registerUser(prevState: any, formData: FormData) {
@@ -65,5 +84,20 @@ export async function registerUser(prevState: any, formData: FormData) {
     }
 
     return { error: "An unexpected error occurred" };
+  }
+}
+
+export async function fetchBooks(
+  params: IPageRequest
+): Promise<IPagedResponse<IBook>> {
+  try {
+    const result = await bookRepo.list(params);
+    if (!result) {
+      throw new Error("No results returned from repository");
+    }
+    return result;
+  } catch (error) {
+    console.error("Error fetching books:", error);
+    throw new Error("Failed to fetch books");
   }
 }

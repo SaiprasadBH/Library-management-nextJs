@@ -1,60 +1,40 @@
 "use client";
 import React, { useActionState } from "react";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from "./card";
-import { Label } from "./label";
 import { Input } from "./input";
 import { Button } from "./button";
-import Link from "next/link";
-import { login } from "@/lib/actions";
+import { Label } from "./label";
+import { authenticate } from "@/lib/actions";
 
-export default function Component() {
-  const initialState = { success: false, error: "" };
-  const [state, formAction] = useActionState(login, initialState);
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
-        <form action={formAction}>
-          <CardHeader>
-            <CardTitle className="text-2xl">Welcome back</CardTitle>
-            <CardDescription>
-              Enter your email and password to access your account.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" required />
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <Button type="submit" className="w-full md:w-auto">
-              Sign in
-            </Button>
-            <div className="text-center text-sm text-muted-foreground">
-              Dont have an account?{" "}
-              <Link href="#" className="underline" prefetch={false}>
-                Register
-              </Link>
-            </div>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
+const LoginForm = () => {
+  const [errorMessage, formAction, isPending] = useActionState(
+    authenticate,
+    undefined
   );
-}
+  return (
+    <>
+      <form action={formAction} className="space-y-3">
+        <div className="mt-2">
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" name="email" type="email" required />
+        </div>
+        <div className="mt-2">
+          <Label htmlFor="password">Password</Label>
+          <Input id="password" name="password" type="password" required />
+        </div>
+        <Button className="mt-4 w-full">Welcome Back</Button>
+        <div
+          className="flex h-8 items-end space-x-1"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {errorMessage && (
+            <>
+              <p className="text-sm text-red-500">{errorMessage}</p>
+            </>
+          )}
+        </div>
+      </form>
+    </>
+  );
+};
+export default LoginForm;

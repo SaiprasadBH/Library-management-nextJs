@@ -4,7 +4,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { IMember } from "../src/lib/definitions";
 import { z } from "zod";
-import { memberRepo } from "./lib/actions";
+import { MemberRepository } from "./lib/repositories/member.repository";
+import { drizzleAdapter } from "./lib/database/drizzle-orm/drizzleMysqlAdapter";
 
 function mapMemberToUser(member: IMember): User {
   return {
@@ -31,6 +32,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const { email, password } = parsedCredentials.data;
 
         try {
+          const memberRepo = new MemberRepository(drizzleAdapter);
           const user = await memberRepo.getByEmail(email);
           if (!user) {
             console.log("User not found");
