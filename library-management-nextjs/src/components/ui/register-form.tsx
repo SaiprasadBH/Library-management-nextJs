@@ -98,7 +98,7 @@ export default function RegisterForm() {
       </Card>
       <div className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}
-        <Link href="#" className="underline" prefetch={false}>
+        <Link href="/login" className="underline" prefetch={false}>
           Login
         </Link>
       </div>

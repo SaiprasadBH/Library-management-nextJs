@@ -15,6 +15,13 @@ import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
 import { IPagedResponse, IPageRequest } from "./core/pagination";
 import { redirect } from "next/navigation";
+import {
+  BookSchema,
+  BookSchemaBase,
+  BookUpdateSchema,
+  IBookBase,
+} from "./database/zod/book.schema";
+import { error } from "console";
 
 const memberRepo = new MemberRepository(drizzleAdapter);
 const bookRepo = new BookRepository(drizzleAdapter);
@@ -99,5 +106,86 @@ export async function fetchBooks(
   } catch (error) {
     console.error("Error fetching books:", error);
     throw new Error("Failed to fetch books");
+  }
+}
+
+export async function updateBook(
+  id: number,
+  prevState: any,
+  formData: FormData
+) {
+  try {
+    const book: IBookBase = {
+      title: formData.get("title") as string,
+      author: formData.get("author") as string,
+      publisher: formData.get("publisher") as string,
+      genre: formData.get("genre") as string,
+      isbnNo: formData.get("isbnNo") as string,
+      numOfPages: Number(formData.get("numofPages")),
+      totalNumOfCopies: Number(formData.get("totalNumOfCopies")),
+    };
+
+    const response = await bookRepo.update(id, book);
+
+    if (!response) {
+      return {
+        error: "Error:Failed to update book",
+      };
+    }
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return { error: error.errors[0].message || "Invalid input" };
+    } else if ((error as Error).message) {
+      return { error: `${(error as Error).message}` };
+    }
+
+    return { error: "An unexpected error occurred" };
+  }
+
+  //TODO revalidate and redirect
+}
+export async function deleteBook(
+  id: number,
+  prevState: any,
+  formData: FormData
+) {
+  try {
+    const deletedBook = await bookRepo.delete(id);
+    if (!deleteBook) {
+      return { error: "failed to delete book" };
+    }
+
+    //TODO revalidate
+    return { success: true };
+  } catch (error) {
+    return { error: "Database Error: Failed to Delete book" };
+  }
+}
+
+export async function createBook(prevState: any, formData: FormData) {
+  try {
+    const book: IBookBase = {
+      title: formData.get("title") as string,
+      author: formData.get("author") as string,
+      publisher: formData.get("publisher") as string,
+      genre: formData.get("genre") as string,
+      isbnNo: formData.get("isbnNo") as string,
+      numOfPages: Number(formData.get("numofPages")),
+      totalNumOfCopies: Number(formData.get("totalNumOfCopies")),
+    };
+
+    const response = await bookRepo.create(book);
+    if (!response) {
+      throw new Error("failed to create book");
+    }
+    return { success: true };
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return { error: error.errors[0].message || "Invalid input" };
+    } else if ((error as Error).message) {
+      return { error: `${(error as Error).message}` };
+    }
+
+    return { error: "An unexpected error occurred" };
   }
 }

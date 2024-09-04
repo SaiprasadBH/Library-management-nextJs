@@ -4,10 +4,10 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-} from "@/app/components/ui/card";
+} from "@/components/ui/card";
 import React from "react";
 import Link from "next/link";
-import LoginForm from "@/app/components/ui/login-form";
+import LoginForm from "@/components/ui/login-form";
 
 const Login = () => {
   return (
@@ -25,9 +25,9 @@ const Login = () => {
           <div>
             <p>
               Don&apos;t have an account?{" "}
-              <Link className="font-bold" href={"/signup"}>
+              <Link className="font-bold" href={"/register"}>
                 Signup
-              </Link>{" "}
+              </Link>
             </p>
           </div>
         </CardContent>

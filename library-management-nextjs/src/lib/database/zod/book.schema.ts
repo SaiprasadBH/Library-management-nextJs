@@ -36,5 +36,9 @@ export const BookSchema = BookSchemaBase.extend({
   availableNumOfCopies: z.number().int().min(0),
 });
 
+export const BookUpdateSchema = BookSchemaBase.extend({
+  availableNumOfCopies: z.number().int().min(0),
+});
+
 export type IBookBase = z.input<typeof BookSchemaBase>;
 export type IBook = z.input<typeof BookSchema>;

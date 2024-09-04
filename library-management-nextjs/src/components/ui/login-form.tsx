@@ -21,7 +21,7 @@ const LoginForm = () => {
           <Label htmlFor="password">Password</Label>
           <Input id="password" name="password" type="password" required />
         </div>
-        <Button className="mt-4 w-full">Welcome Back</Button>
+        <Button className="mt-4 w-full">Login</Button>
         <div
           className="flex h-8 items-end space-x-1"
           aria-live="polite"

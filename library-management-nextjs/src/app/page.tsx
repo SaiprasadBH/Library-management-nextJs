@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Component() {
@@ -47,7 +48,7 @@ export default function Component() {
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
-              <img
+              <Image
                 src="/placeholder.svg"
                 alt="Hero"
                 className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last lg:aspect-square"
@@ -62,7 +63,7 @@ export default function Component() {
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
                     Granthalaya is a powerful library management app designed to
                     streamline your private library operations. Easily track
-                    book inventory, manage borrowers, and generate reports.
+                    book inventory, manage borrowers.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -102,7 +103,7 @@ export default function Component() {
               </div>
             </div>
             <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-2 lg:gap-12">
-              <img
+              <Image
                 src="/placeholder.svg"
                 alt="About"
                 className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full lg:order-last"
