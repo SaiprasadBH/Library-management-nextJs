@@ -2,7 +2,7 @@ import { fetchBooks } from "@/lib/actions";
 import { IPagedResponse, IPageRequest } from "@/lib/core/pagination";
 import { IBook } from "@/lib/definitions";
 import PaginationControl from "../../components/ui/paginationControl";
-import { BookCard } from "../../components/ui/book-card";
+import { BookCard } from "../../components/ui/book-mangement/book-card";
 import Search from "../../components/ui/search";
 
 export default async function BooksPage({

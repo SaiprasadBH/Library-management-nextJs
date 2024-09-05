@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
-import { Card, CardContent } from "./card";
-import { Button } from "./button";
+import { Card, CardContent } from "../card";
+import { Button } from "../button";
 interface BookCardProps {
   title: string;
   author: string;

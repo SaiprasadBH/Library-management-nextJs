@@ -22,6 +22,7 @@ import {
   IBookBase,
 } from "./database/zod/book.schema";
 import { error } from "console";
+import { revalidatePath } from "next/cache";
 
 const memberRepo = new MemberRepository(drizzleAdapter);
 const bookRepo = new BookRepository(drizzleAdapter);
@@ -114,17 +115,17 @@ export async function updateBook(
   prevState: any,
   formData: FormData
 ) {
+  console.log(formData.get("numOfPages"));
+  const book: IBookBase = {
+    title: formData.get("title") as string,
+    author: formData.get("author") as string,
+    publisher: formData.get("publisher") as string,
+    genre: formData.get("genre") as string,
+    isbnNo: formData.get("isbnNo") as string,
+    numOfPages: Number(formData.get("numOfPages")),
+    totalNumOfCopies: Number(formData.get("totalNumOfCopies")),
+  };
   try {
-    const book: IBookBase = {
-      title: formData.get("title") as string,
-      author: formData.get("author") as string,
-      publisher: formData.get("publisher") as string,
-      genre: formData.get("genre") as string,
-      isbnNo: formData.get("isbnNo") as string,
-      numOfPages: Number(formData.get("numofPages")),
-      totalNumOfCopies: Number(formData.get("totalNumOfCopies")),
-    };
-
     const response = await bookRepo.update(id, book);
 
     if (!response) {
@@ -141,21 +142,17 @@ export async function updateBook(
 
     return { error: "An unexpected error occurred" };
   }
-
-  //TODO revalidate and redirect
+  revalidatePath(`/admin/books`);
+  redirect("/admin/books");
 }
-export async function deleteBook(
-  id: number,
-  prevState: any,
-  formData: FormData
-) {
+export async function deleteBook(id: number) {
   try {
     const deletedBook = await bookRepo.delete(id);
     if (!deleteBook) {
       return { error: "failed to delete book" };
     }
-
-    //TODO revalidate
+    revalidatePath("/admin/books");
+    redirect("/admin/books");
     return { success: true };
   } catch (error) {
     return { error: "Database Error: Failed to Delete book" };
@@ -187,5 +184,13 @@ export async function createBook(prevState: any, formData: FormData) {
     }
 
     return { error: "An unexpected error occurred" };
+  }
+}
+
+export async function getBookById(id: number) {
+  try {
+    return await bookRepo.getById(id);
+  } catch (err) {
+    console.error("unexpected error occured");
   }
 }

@@ -6,6 +6,7 @@ import { IMember } from "../src/lib/definitions";
 import { z } from "zod";
 import { MemberRepository } from "./lib/repositories/member.repository";
 import { drizzleAdapter } from "./lib/database/drizzle-orm/drizzleMysqlAdapter";
+import Google from "next-auth/providers/google";
 
 function mapMemberToUser(member: IMember): User {
   return {
@@ -18,6 +19,7 @@ function mapMemberToUser(member: IMember): User {
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   providers: [
+    Google,
     CredentialsProvider({
       authorize: async (credentials) => {
         const parsedCredentials = z

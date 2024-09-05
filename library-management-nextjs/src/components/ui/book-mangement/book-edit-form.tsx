@@ -1,10 +1,10 @@
 "use client";
 
 import { IBook } from "@/lib/definitions";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./card";
-import { Label } from "./label";
-import { Input } from "./input";
-import { Button } from "./button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../card";
+import { Label } from "../label";
+import { Input } from "../input";
+import { Button } from "../button";
 import { SaveIcon, TrashIcon } from "lucide-react";
 import { useActionState } from "react";
 import { deleteBook, updateBook } from "@/lib/actions";
@@ -12,7 +12,6 @@ import { deleteBook, updateBook } from "@/lib/actions";
 export default function BookEditForm({ book }: { book: IBook }) {
   const initialState = { success: false, error: "" };
   const UpdateBookWithId = updateBook.bind(null, book.id);
-  const deleteBookwithId = deleteBook.bind(null, book.id);
 
   const [updateState, updateFormAction] = useActionState(
     UpdateBookWithId,
@@ -79,12 +78,6 @@ export default function BookEditForm({ book }: { book: IBook }) {
             <SaveIcon className="mr-2 h-4 w-4" />
             Save Changes
           </Button>
-          <form className="w-full sm:w-auto">
-            <Button type="submit" variant="destructive" className="w-full">
-              <TrashIcon className="mr-2 h-4 w-4" />
-              Delete Book
-            </Button>
-          </form>
         </CardFooter>
       </form>
       {updateState?.error && (

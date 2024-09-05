@@ -8,6 +8,7 @@ import {
 import React from "react";
 import Link from "next/link";
 import LoginForm from "@/components/ui/login-form";
+import GoogleLoginButton from "@/components/ui/google-loginButton";
 
 const Login = () => {
   return (
@@ -21,6 +22,7 @@ const Login = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <LoginForm />
+          <GoogleLoginButton />
 
           <div>
             <p>

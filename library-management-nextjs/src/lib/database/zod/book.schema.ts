@@ -23,8 +23,7 @@ export const BookSchemaBase = z.object({
     .max(13, { message: "ISBN number must be 13 characters long." }),
   numOfPages: z
     .number({ message: "Number of pages must be a number." })
-    .int({ message: "Number of pages cannot be a decimal number." })
-    .positive("Number of pages must be a positive integer"),
+    .int({ message: "Number of pages cannot be a decimal number." }),
   totalNumOfCopies: z
     .number({ message: "Number of copies must be a number." })
     .int({ message: "Number of copies cannot be a decimal number." })
