@@ -1,5 +1,5 @@
 import { defineConfig } from "drizzle-kit";
-import { AppEnvs } from "./src/lib/core/pagination/read-env";
+import { AppEnvs } from "@/lib/core/read-env";
 
 export default defineConfig({
   schema: "./src/lib/database/drizzle-orm/schema.ts",

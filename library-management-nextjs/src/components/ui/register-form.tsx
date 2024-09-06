@@ -75,13 +75,6 @@ export default function RegisterForm() {
               <Label htmlFor="password">Password</Label>
               <Input id="password" name="password" type="password" required />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
-              <select name="role">
-                <option value="user">user</option>
-                <option value="admin">admin</option>
-              </select>
-            </div>
           </CardContent>
           <CardFooter>
             <Button type="submit" className="ml-auto">

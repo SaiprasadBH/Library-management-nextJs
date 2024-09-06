@@ -8,7 +8,7 @@ export default function GoogleLoginButton() {
     <form
       action={async () => {
         "use server";
-        await signIn("google");
+        await signIn("google", { redirectTo: "/admin/books" });
       }}
     >
       <Button type="submit" variant="outline" className="w-full">

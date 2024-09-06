@@ -7,6 +7,7 @@ import { z } from "zod";
 import { MemberRepository } from "./lib/repositories/member.repository";
 import { drizzleAdapter } from "./lib/database/drizzle-orm/drizzleMysqlAdapter";
 import Google from "next-auth/providers/google";
+import { createMember } from "./lib/actions";
 
 function mapMemberToUser(member: IMember): User {
   return {
@@ -55,4 +56,30 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
+  callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        try {
+          if (user) {
+            const memberRepo = new MemberRepository(drizzleAdapter);
+            const existingUser = await memberRepo.getByEmail(user.email!);
+            if (!existingUser) {
+              const result = await memberRepo.create({
+                name: user.name!,
+                email: user.email!,
+                age: 18,
+                password: "GoogleLogin@123",
+                role: "user",
+                address: "default address",
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error creating user:", error);
+          return false;
+        }
+      }
+      return true;
+    },
+  },
 });
