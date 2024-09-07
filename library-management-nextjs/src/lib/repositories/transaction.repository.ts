@@ -121,9 +121,7 @@ export class TransactionRepository
     return selectedTransaction;
   }
 
-  async list(
-    params: IPageRequest
-  ): Promise<IPagedResponse<ITransaction> | undefined> {
+  async list(params: IPageRequest): Promise<IPagedResponse<ITransaction>> {
     const db = await this.dbConnFactory.getPoolConnection();
     let searchWhereClause;
 

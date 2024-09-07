@@ -5,7 +5,12 @@ import {
   books,
   members,
 } from "./database/drizzle-orm/drizzleMysqlAdapter";
-import { IBook, IMemberBase, ITransactionBase } from "./definitions";
+import {
+  IBook,
+  IMemberBase,
+  ITransaction,
+  ITransactionBase,
+} from "./definitions";
 import { IMember, MemberBaseSchema } from "./database/zod/member.schema";
 import { hashPassword } from "./hashing/passwordHashing";
 import { eq } from "drizzle-orm";
@@ -133,6 +138,18 @@ export async function fetchMembers(
   } catch (err) {
     console.error("Error in fetching member", error);
     throw new Error("Falid to fetch members");
+  }
+}
+export async function fetchRequests(params: IPageRequest) {
+  try {
+    const result = transactionRepo.list(params);
+    if (!result) {
+      throw new Error("No transaction returned from repository");
+    } else {
+      return result;
+    }
+  } catch (error) {
+    console.error("Error in listing transaction", error);
   }
 }
 
