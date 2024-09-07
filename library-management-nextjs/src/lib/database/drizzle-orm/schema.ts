@@ -44,5 +44,5 @@ export const transactions = mysqlTable("transactions", {
     length: 35,
     enum: ["pending", "rejected", "issued", "returned"],
   }).notNull(),
-  dateOfIssue: varchar("dateOfIssue", { length: 15 }).notNull(),
+  dateOfIssue: varchar("dateOfIssue", { length: 15 }),
 });

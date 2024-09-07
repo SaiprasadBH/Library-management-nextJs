@@ -22,8 +22,11 @@ export class TransactionRepository
   );
 
   async create(data: ITransactionBase): Promise<ITransaction | undefined> {
-    const validatedData = ITransactionBaseSchema.parse(data);
-    const book = await this.bookRepo.getById(validatedData.bookId);
+    //const validatedData = ITransactionBaseSchema.parse(data);
+    const validatedData = data;
+    console.log(validatedData);
+    const book = await this.bookRepo.getById(Number(validatedData.bookId));
+
     if (!book || book.availableNumOfCopies <= 0) {
       throw new Error("The book is not available or has no available copies.");
     }
@@ -38,7 +41,7 @@ export class TransactionRepository
       memberId: BigInt(validatedData.memberId),
       bookId: BigInt(validatedData.bookId),
       bookStatus: "pending",
-      dateOfIssue: new Date().toISOString(),
+      dateOfIssue: new Date().toISOString().split("T")[0],
     };
 
     const db = await this.dbConnFactory.getPoolConnection();
@@ -48,15 +51,12 @@ export class TransactionRepository
           const [result] = await tx
             .select()
             .from(transactions)
-            .where(eq(transactions.bookId, BigInt(validatedData.bookId)));
+            .where(eq(transactions.bookId, validatedData.bookId));
           await tx.insert(transactions).values(newTransaction);
-          await tx
-            .update(books)
-            .set({ availableNumOfCopies: updatedBook.availableNumOfCopies })
-            .where(eq(books.id, validatedData.bookId));
           return result;
         }
       );
+      await this.bookRepo.update(book.id, updatedBook);
 
       return createdTransaction;
     } catch (err) {

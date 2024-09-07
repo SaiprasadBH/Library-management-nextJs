@@ -87,7 +87,7 @@ export async function BorrowButton({ bookId }: { bookId: number }) {
         title: "Success",
         description: "Book requested successfully",
       });
-    } else if (state.error) {
+    } else if (state.error || !state.success) {
       toast({
         title: "Error",
         description: state.error,

@@ -84,7 +84,7 @@ export default async function AdminHomePage({
                 <TableCell>{book.genre}</TableCell>
                 <TableCell>{book.isbnNo}</TableCell>
                 <TableCell>{book.numOfPages}</TableCell>
-                <TableCell>{book.totalNumOfCopies}</TableCell>
+                <TableCell>{book.availableNumOfCopies}</TableCell>
                 <TableCell>
                   <div className="flex space-x-2">
                     <EditButton url={`books/${book.id}/edit`}></EditButton>

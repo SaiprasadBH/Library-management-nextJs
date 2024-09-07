@@ -24,9 +24,11 @@ import {
 import { error } from "console";
 import { revalidatePath } from "next/cache";
 import { TransactionRepository } from "./repositories/transaction.repository";
+import { MySql2Database } from "drizzle-orm/mysql2";
 
 const memberRepo = new MemberRepository(drizzleAdapter);
 const bookRepo = new BookRepository(drizzleAdapter);
+const connection = await drizzleAdapter.getPoolConnection();
 const transactionRepo = new TransactionRepository(drizzleAdapter);
 
 export async function fetchAllBooks() {
@@ -139,7 +141,6 @@ export async function updateBook(
   prevState: any,
   formData: FormData
 ) {
-  console.log(formData.get("numOfPages"));
   const book: IBookBase = {
     title: formData.get("title") as string,
     author: formData.get("author") as string,
@@ -282,14 +283,17 @@ export async function createBookRequest(id: number) {
       bookId: BigInt(id),
     };
     const response = await transactionRepo.create(transactionData);
-
+    console.log("response should print here", response);
+    console.log("control is here 1");
     if (!response) {
-      return { error: "failed to create book request" };
+      return { error: "failed to create request" };
     }
+    revalidatePath("/admin/books");
     return { success: true };
   } catch (error) {
+    console.error(error);
     return {
-      error: "failed to create book request",
+      error: (error as Error).message,
     };
   }
 }

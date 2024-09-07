@@ -6,5 +6,5 @@ export interface ITransactionBase {
 export interface ITransaction extends ITransactionBase {
   id: number;
   bookStatus: "issued" | "returned" | "pending" | "rejected";
-  dateOfIssue: string;
+  dateOfIssue: string | null;
 }
