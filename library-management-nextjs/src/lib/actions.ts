@@ -142,7 +142,20 @@ export async function fetchMembers(
 }
 export async function fetchRequests(params: IPageRequest) {
   try {
-    const result = transactionRepo.list(params);
+    const result = transactionRepo.listRequests(params);
+    if (!result) {
+      throw new Error("No transaction returned from repository");
+    } else {
+      return result;
+    }
+  } catch (error) {
+    console.error("Error in listing transaction", error);
+  }
+}
+
+export async function fetchNonPendingTransactions(params: IPageRequest) {
+  try {
+    const result = transactionRepo.listNonPendingTransactions(params);
     if (!result) {
       throw new Error("No transaction returned from repository");
     } else {
@@ -205,13 +218,27 @@ export async function deleteMember(id: number) {
   try {
     const deletedMember = await memberRepo.delete(id);
     if (!deletedMember) {
-      throw new Error("failed to delete");
+      throw new Error("failed to delete member");
     }
     revalidatePath("/admin/members");
   } catch (error) {
     console.error(error);
   } finally {
     redirect("/admin/members");
+  }
+}
+
+export async function deleteTransaction(id: number) {
+  try {
+    const deletedMember = await transactionRepo.delete(id);
+    if (!deletedMember) {
+      throw new Error("failed to delete transaction");
+    }
+    revalidatePath("/admin/transactions");
+  } catch (error) {
+    console.error(error);
+  } finally {
+    redirect("/admin/transactions");
   }
 }
 
@@ -300,12 +327,58 @@ export async function createBookRequest(id: number) {
       bookId: BigInt(id),
     };
     const response = await transactionRepo.create(transactionData);
-    console.log("response should print here", response);
-    console.log("control is here 1");
     if (!response) {
       return { error: "failed to create request" };
     }
     revalidatePath("/admin/books");
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return {
+      error: (error as Error).message,
+    };
+  }
+}
+
+export async function approveRequest(id: number) {
+  try {
+    const response = await transactionRepo.updateStatus(id, "issued");
+    if (!response) {
+      return { error: "Failed to approve request" };
+    }
+    revalidatePath("/admin/requests");
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return {
+      error: (error as Error).message,
+    };
+  }
+}
+
+export async function rejectRequest(id: number) {
+  try {
+    const response = await transactionRepo.updateStatus(id, "rejected");
+    if (!response) {
+      return { error: "Failed to reject request" };
+    }
+    revalidatePath("/admin/requests");
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return {
+      error: (error as Error).message,
+    };
+  }
+}
+
+export async function returnRequest(id: number) {
+  try {
+    const response = await transactionRepo.updateStatus(id, "returned");
+    if (!response) {
+      return { error: "Failed to return book" };
+    }
+    revalidatePath("/admin/return-book");
     return { success: true };
   } catch (error) {
     console.error(error);

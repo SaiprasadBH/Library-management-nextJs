@@ -1,11 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Edit, Lectern, Trash2, TrashIcon } from "lucide-react";
+import {
+  BookOpen,
+  CheckCircle,
+  Edit,
+  Lectern,
+  Trash2,
+  TrashIcon,
+  XCircle,
+} from "lucide-react";
 import { Button } from "./button";
 import { IBook, IBookBase, IMember, IMemberBase } from "@/lib/definitions";
 import { useActionState } from "react";
-import { createBookRequest, deleteBook, deleteMember } from "@/lib/actions";
+import {
+  approveRequest,
+  createBookRequest,
+  deleteBook,
+  deleteMember,
+  deleteTransaction,
+  rejectRequest,
+} from "@/lib/actions";
 
 import { AlertDialogFooter, AlertDialogHeader } from "./alert-dialog";
 import Link from "next/link";
@@ -27,7 +42,7 @@ export const DeleteButton = ({
 }: {
   id: number;
   name: string;
-  type: "book" | "member";
+  type: "book" | "member" | "transaction";
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -36,6 +51,8 @@ export const DeleteButton = ({
       await deleteBook(id);
     } else if (type === "member") {
       await deleteMember(id);
+    } else if (type === "transaction") {
+      await deleteTransaction(id);
     }
 
     setIsOpen(false);
@@ -101,6 +118,68 @@ export async function BorrowButton({ bookId }: { bookId: number }) {
       <Button size="sm" variant="outline" type="submit">
         <BookOpen className="h-4 w-4 mr-2" />
         {"Borrow"}
+      </Button>
+    </form>
+  );
+}
+
+export async function ApproveButton({
+  transactionId,
+}: {
+  transactionId: number;
+}) {
+  async function formAction() {
+    const state = await approveRequest(transactionId);
+    if (state.success) {
+      toast({
+        title: "Success",
+        description: "Request approved successfully",
+      });
+    } else if (state.error || !state.success) {
+      toast({
+        title: "Error",
+        description: state.error,
+        variant: "destructive",
+      });
+    }
+  }
+
+  return (
+    <form action={formAction}>
+      <Button className="bg-green-500 hover:bg-green-600 text-white">
+        <CheckCircle className="mr-2 h-4 w-4" />
+        Approve
+      </Button>
+    </form>
+  );
+}
+
+export async function RejectButton({
+  transactionId,
+}: {
+  transactionId: number;
+}) {
+  async function formAction() {
+    const state = await rejectRequest(transactionId);
+    if (state.success) {
+      toast({
+        title: "Success",
+        description: "Request Rejected successfully",
+      });
+    } else if (state.error || !state.success) {
+      toast({
+        title: "Error",
+        description: state.error,
+        variant: "destructive",
+      });
+    }
+  }
+
+  return (
+    <form action={formAction}>
+      <Button className="bg-red-500 hover:bg-red-600 text-white">
+        <XCircle className="mr-2 h-4 w-4" />
+        Reject
       </Button>
     </form>
   );

@@ -16,6 +16,7 @@ import { ITransaction } from "@/lib/database/zod/transaction.schema";
 import { BookRepository } from "@/lib/repositories/book.repository";
 import { drizzleAdapter } from "@/lib/database/drizzle-orm/drizzleMysqlAdapter";
 import { MemberRepository } from "@/lib/repositories/member.repository";
+import { ApproveButton, RejectButton } from "@/components/ui/customButtons";
 
 export default async function RequestManagementPage({
   searchParams,
@@ -89,14 +90,8 @@ export default async function RequestManagementPage({
                 <TableCell>{request.bookTitle}</TableCell>
                 <TableCell>
                   <div className="flex space-x-2">
-                    <Button className="bg-green-500 hover:bg-green-600 text-white">
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      Approve
-                    </Button>
-                    <Button className="bg-red-500 hover:bg-red-600 text-white">
-                      <XCircle className="mr-2 h-4 w-4" />
-                      Reject
-                    </Button>
+                    <ApproveButton transactionId={request.id}></ApproveButton>
+                    <RejectButton transactionId={request.id}></RejectButton>
                   </div>
                 </TableCell>
               </TableRow>

@@ -64,6 +64,53 @@ export class TransactionRepository
     }
   }
 
+  async updateStatus(
+    id: number,
+    bookStatus: "pending" | "issued" | "rejected" | "returned"
+  ): Promise<ITransaction | undefined> {
+    // Fetch the transaction by ID to ensure it exists
+    const transaction = await this.getById(id);
+    if (!transaction) {
+      throw new Error("Transaction not found.");
+    }
+
+    const db = await this.dbConnFactory.getPoolConnection();
+
+    // If the status is "rejected", fetch the book and update the available copies
+    if (bookStatus === "rejected" || bookStatus === "returned") {
+      const book = await this.bookRepo.getById(Number(transaction.bookId));
+      if (!book) {
+        throw new Error("Book not found.");
+      }
+
+      const updatedBook: IBook = {
+        ...book,
+        availableNumOfCopies: book.availableNumOfCopies + 1,
+      };
+
+      // Update the book's available copies in the database
+      await this.bookRepo.update(book.id, updatedBook);
+    }
+
+    try {
+      // Update the transaction's bookStatus
+      const updatedTransaction = await db.transaction(async (tx) => {
+        await tx
+          .update(transactions)
+          .set({ bookStatus })
+          .where(eq(transactions.id, id));
+
+        return transaction;
+      });
+
+      return updatedTransaction;
+    } catch (err) {
+      throw new Error(
+        "Transaction status update failed: " + (err as Error).message
+      );
+    }
+  }
+
   async delete(id: number): Promise<ITransaction | undefined> {
     const transaction = await this.getById(id);
     if (!transaction) {
@@ -72,31 +119,16 @@ export class TransactionRepository
       );
     }
 
-    if (transaction.bookStatus === "returned") {
-      throw new Error("This book has already been returned.");
+    if (transaction.bookStatus === "pending") {
+      throw new Error(
+        "Pending transaction cannot be deleted please approve or reject"
+      );
     }
-
-    const book = await this.bookRepo.getById(Number(transaction.bookId));
-    if (!book) {
-      throw new Error("Book not found.");
-    }
-
-    const updatedBook: IBook = {
-      ...book,
-      availableNumOfCopies: book.availableNumOfCopies + 1,
-    };
 
     const db = await this.dbConnFactory.getPoolConnection();
     try {
       const updatedTransaction = await db.transaction(async (tx) => {
-        await tx
-          .update(transactions)
-          .set({ bookStatus: "returned" })
-          .where(eq(transactions.id, id));
-        await tx
-          .update(books)
-          .set({ availableNumOfCopies: updatedBook.availableNumOfCopies })
-          .where(eq(books.id, book.id));
+        await tx.delete(transactions).where(eq(transactions.id, id));
         return transaction;
       });
 
@@ -128,6 +160,81 @@ export class TransactionRepository
     if (params.search) {
       const search = `%${params.search.toLowerCase()}%`;
       searchWhereClause = sql`${transactions.bookId} LIKE ${search} OR ${transactions.memberId} LIKE ${search}`;
+    }
+
+    const items = await db
+      .select()
+      .from(transactions)
+      .where(searchWhereClause)
+      .offset(params.offset)
+      .limit(params.limit);
+
+    const [{ count: total }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(transactions)
+      .where(searchWhereClause);
+
+    return {
+      items,
+      pagination: {
+        offset: params.offset,
+        limit: params.limit,
+        total,
+      },
+    };
+  }
+  async listRequests(
+    params: IPageRequest
+  ): Promise<IPagedResponse<ITransaction>> {
+    const db = await this.dbConnFactory.getPoolConnection();
+    let searchWhereClause;
+
+    // Always include the condition for bookStatus = 'pending'
+    if (params.search) {
+      const search = `%${params.search.toLowerCase()}%`;
+      // Include the search condition and bookStatus = 'pending' together
+      searchWhereClause = sql`${transactions.bookStatus} = 'pending' AND (${transactions.bookId} LIKE ${search} OR ${transactions.memberId} LIKE ${search})`;
+    } else {
+      // If no search, only filter by bookStatus = 'pending'
+      searchWhereClause = sql`${transactions.bookStatus} = 'pending'`;
+    }
+
+    const items = await db
+      .select()
+      .from(transactions)
+      .where(searchWhereClause)
+      .offset(params.offset)
+      .limit(params.limit);
+
+    const [{ count: total }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(transactions)
+      .where(searchWhereClause);
+
+    return {
+      items,
+      pagination: {
+        offset: params.offset,
+        limit: params.limit,
+        total,
+      },
+    };
+  }
+
+  async listNonPendingTransactions(
+    params: IPageRequest
+  ): Promise<IPagedResponse<ITransaction>> {
+    const db = await this.dbConnFactory.getPoolConnection();
+    let searchWhereClause;
+
+    // Search for non-pending transactions
+    if (params.search) {
+      const search = `%${params.search.toLowerCase()}%`;
+      // Exclude transactions with bookStatus = 'pending' and apply search criteria
+      searchWhereClause = sql`${transactions.bookStatus} != 'pending' AND (${transactions.bookId} LIKE ${search} OR ${transactions.memberId} LIKE ${search})`;
+    } else {
+      // If no search term is provided, just filter by non-pending transactions
+      searchWhereClause = sql`${transactions.bookStatus} != 'pending'`;
     }
 
     const items = await db
