@@ -327,16 +327,16 @@ export async function createBookRequest(id: number) {
       bookId: BigInt(id),
     };
     const response = await transactionRepo.create(transactionData);
-    if (!response) {
-      return { error: "failed to create request" };
-    }
-    revalidatePath("/admin/books");
+
     return { success: true };
   } catch (error) {
     console.error(error);
     return {
       error: (error as Error).message,
     };
+  } finally {
+    revalidatePath("/admin/books");
+    revalidatePath("/admin/requests");
   }
 }
 

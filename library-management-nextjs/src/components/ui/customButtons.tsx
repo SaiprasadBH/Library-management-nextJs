@@ -124,6 +124,30 @@ export async function BorrowButton({ bookId }: { bookId: number }) {
   );
 }
 
+export async function LargeBorrowButton({ bookId }: { bookId: number }) {
+  async function formAction() {
+    const state = await createBookRequest(bookId);
+    if (state.success) {
+      toast({
+        title: "Success",
+        description: "Book requested successfully",
+      });
+    } else if (state.error || !state.success) {
+      toast({
+        title: "Error",
+        description: state.error,
+        variant: "destructive",
+      });
+    }
+  }
+
+  return (
+    <form action={formAction}>
+      <Button className="mt-4 md:mt-6 lg:mt-8">Borrow</Button>
+    </form>
+  );
+}
+
 export async function ApproveButton({
   transactionId,
 }: {

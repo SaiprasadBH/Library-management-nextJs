@@ -2,9 +2,11 @@
 import React from "react";
 import { Card, CardContent } from "../card";
 import { Button } from "../button";
+import { LargeBorrowButton } from "../customButtons";
 interface BookCardProps {
   title: string;
   author: string;
+  bookId: number;
 }
 export function BookCard(props: BookCardProps) {
   return (
@@ -18,7 +20,7 @@ export function BookCard(props: BookCardProps) {
             {props.author}
           </p>
         </div>
-        <Button className="mt-4 md:mt-6 lg:mt-8">Borrow</Button>
+        <LargeBorrowButton bookId={props.bookId}></LargeBorrowButton>
       </CardContent>
     </Card>
   );

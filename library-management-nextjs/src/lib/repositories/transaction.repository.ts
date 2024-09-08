@@ -21,7 +21,7 @@ export class TransactionRepository
     this.dbConnFactory
   );
 
-  async create(data: ITransactionBase): Promise<ITransaction | undefined> {
+  async create(data: ITransactionBase): Promise<ITransaction> {
     //const validatedData = ITransactionBaseSchema.parse(data);
     const validatedData = data;
     console.log(validatedData);
