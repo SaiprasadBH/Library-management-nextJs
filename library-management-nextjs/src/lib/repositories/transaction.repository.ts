@@ -258,4 +258,44 @@ export class TransactionRepository
       },
     };
   }
+
+  async listIssuedTransactions(
+    params: IPageRequest
+  ): Promise<IPagedResponse<ITransaction>> {
+    const db = await this.dbConnFactory.getPoolConnection();
+    let searchWhereClause;
+
+    // Search for transactions with bookStatus = 'issued'
+    if (params.search) {
+      const search = `%${params.search.toLowerCase()}%`;
+      searchWhereClause = sql`${transactions.bookStatus} = 'issued' AND (${transactions.bookId} LIKE ${search} OR ${transactions.memberId} LIKE ${search})`;
+    } else {
+      // If no search term is provided, filter only by 'issued' transactions
+      searchWhereClause = sql`${transactions.bookStatus} = 'issued'`;
+    }
+
+    // Fetch the issued transactions
+    const items = await db
+      .select()
+      .from(transactions)
+      .where(searchWhereClause)
+      .offset(params.offset)
+      .limit(params.limit);
+
+    // Fetch the total count of issued transactions
+    const [{ count: total }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(transactions)
+      .where(searchWhereClause);
+
+    // Return the paginated response
+    return {
+      items,
+      pagination: {
+        offset: params.offset,
+        limit: params.limit,
+        total,
+      },
+    };
+  }
 }

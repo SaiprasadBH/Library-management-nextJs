@@ -20,6 +20,7 @@ import {
   deleteMember,
   deleteTransaction,
   rejectRequest,
+  returnRequest,
 } from "@/lib/actions";
 
 import { AlertDialogFooter, AlertDialogHeader } from "./alert-dialog";
@@ -180,6 +181,37 @@ export async function RejectButton({
       <Button className="bg-red-500 hover:bg-red-600 text-white">
         <XCircle className="mr-2 h-4 w-4" />
         Reject
+      </Button>
+    </form>
+  );
+}
+
+export async function ReturnButton({
+  transactionId,
+}: {
+  transactionId: number;
+}) {
+  async function formAction() {
+    const state = await returnRequest(transactionId);
+    if (state.success) {
+      toast({
+        title: "Success",
+        description: "Book returned successfully",
+      });
+    } else if (state.error || !state.success) {
+      toast({
+        title: "Error",
+        description: state.error,
+        variant: "destructive",
+      });
+    }
+  }
+
+  return (
+    <form action={formAction}>
+      <Button className="bg-primary hover:bg-primary/90 text-white">
+        <BookOpen className="mr-2 h-4 w-4" />
+        Return
       </Button>
     </form>
   );

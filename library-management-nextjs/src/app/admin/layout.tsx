@@ -56,8 +56,8 @@ function NavLinks() {
       <Link href="/admin/members" className="hover:underline">
         Members
       </Link>
-      <Link href="/admin/dashboard" className="hover:underline">
-        Dashboard
+      <Link href="/admin/return-book" className="hover:underline">
+        Return Book
       </Link>
     </>
   );
