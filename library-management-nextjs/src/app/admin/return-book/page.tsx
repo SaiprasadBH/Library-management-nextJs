@@ -66,9 +66,7 @@ export default async function BookReturnManagementPage({
           Book Return Management
         </h1>
       </div>
-      <div className="mb-6">
-        <Search placeholder="Search for a borrowed book" />
-      </div>
+      <div className="mb-6"></div>
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>

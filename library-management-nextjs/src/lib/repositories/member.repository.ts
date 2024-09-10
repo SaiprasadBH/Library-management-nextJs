@@ -1,11 +1,13 @@
 import { IRepository } from "../core/repository";
-import { IMember, IMemberBase } from "../definitions";
+import { IBook, IMember, IMemberBase } from "../definitions";
 import { IPageRequest, IPagedResponse } from "../core/pagination";
 import {
+  books,
   drizzleAdapter,
   members,
+  transactions,
 } from "../database/drizzle-orm/drizzleMysqlAdapter";
-import { eq, like, sql } from "drizzle-orm";
+import { and, eq, like, sql } from "drizzle-orm";
 import { MemberBaseSchema } from "../database/zod/member.schema";
 
 export class MemberRepository implements IRepository<IMemberBase, IMember> {
@@ -71,6 +73,24 @@ export class MemberRepository implements IRepository<IMemberBase, IMember> {
     return selectedMember;
   }
 
+  async getBooks(memberId: number): Promise<IBook[] | undefined> {
+    const db = await this.dbConnFactory.getPoolConnection();
+    const whereClause = and(
+      eq(transactions.memberId, BigInt(memberId)), // Convert memberId to BigInt for compatibility
+      eq(transactions.bookStatus, "issued") // Check if the status is 'issued'
+    );
+
+    const issuedBooks = await db
+      .select()
+      .from(books)
+      .innerJoin(transactions, eq(transactions.bookId, books.id))
+      .where(whereClause);
+
+    return issuedBooks.length
+      ? issuedBooks.map((record) => record.books)
+      : undefined;
+  }
+
   async list(
     params: IPageRequest
   ): Promise<IPagedResponse<IMember> | undefined> {
@@ -96,6 +116,41 @@ export class MemberRepository implements IRepository<IMemberBase, IMember> {
 
     return {
       items,
+      pagination: {
+        offset: params.offset,
+        limit: params.limit,
+        total,
+      },
+    };
+  }
+
+  async listBooks(
+    memberId: number,
+    params: IPageRequest
+  ): Promise<IPagedResponse<IBook>> {
+    const db = await this.dbConnFactory.getPoolConnection();
+
+    // Define the whereClause using 'and' to combine the conditions
+    const whereClause = and(
+      eq(transactions.memberId, BigInt(memberId)), // Convert memberId to BigInt for compatibility
+      eq(transactions.bookStatus, "issued") // Check if the status is 'issued'
+    );
+
+    const issuedBooks = await db
+      .select()
+      .from(books)
+      .innerJoin(transactions, eq(transactions.bookId, books.id))
+      .where(whereClause)
+      .offset(params.offset)
+      .limit(params.limit);
+
+    const [{ total }] = await db
+      .select({ total: sql<number>`COUNT(*)` })
+      .from(transactions)
+      .where(whereClause);
+
+    return {
+      items: issuedBooks.map((record) => record.books),
       pagination: {
         offset: params.offset,
         limit: params.limit,

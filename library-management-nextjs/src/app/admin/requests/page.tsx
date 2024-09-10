@@ -42,7 +42,6 @@ export default async function RequestManagementPage({
   const bookRepo = new BookRepository(drizzleAdapter);
   const memberRepo = new MemberRepository(drizzleAdapter);
 
-  // Fetch member and book details for each request
   const enrichedRequests = await Promise.all(
     requests!.map(async (request) => {
       const member = await memberRepo.getById(Number(request.memberId));
@@ -55,16 +54,6 @@ export default async function RequestManagementPage({
       };
     })
   );
-
-  async function handleApprove() {
-    // Implement approve logic here
-    //console.log(`Approve request ${requestId}`);
-  }
-
-  async function handleReject() {
-    // Implement reject logic here
-    // console.log(`Reject request ${requestId}`);
-  }
 
   return (
     <>

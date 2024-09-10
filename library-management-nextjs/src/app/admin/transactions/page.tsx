@@ -78,9 +78,7 @@ export default async function Component({
           Delete Returned
         </Button>
       </div>
-      <div className="mb-6">
-        <Search placeholder="Search for a transaction" />
-      </div>
+      <div className="mb-6"></div>
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>

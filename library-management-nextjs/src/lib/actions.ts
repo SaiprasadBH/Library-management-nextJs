@@ -126,6 +126,25 @@ export async function fetchBooks(
   }
 }
 
+export async function fetchUserSpecificBooks(
+  params: IPageRequest
+): Promise<IPagedResponse<IBook>> {
+  try {
+    const currentUser = await getUserDetails();
+    if (!currentUser) {
+      throw new Error("User does not exist");
+    }
+    const result = await memberRepo.listBooks(currentUser.id, params);
+    if (!result) {
+      throw new Error("No books returned from repository");
+    }
+    return result;
+  } catch (error) {
+    console.error("Error fetching books:", error);
+    throw new Error("Failed to fetch books");
+  }
+}
+
 export async function fetchMembers(
   params: IPageRequest
 ): Promise<IPagedResponse<IMember>> {
@@ -200,6 +219,43 @@ export async function updateBook(
   revalidatePath(`/admin/books`);
   redirect("/admin/books");
 }
+
+export async function updateMember(
+  id: number,
+  prevState: any,
+  formData: FormData
+) {
+  const password = await hashPassword(formData.get("password") as string);
+  const member: IMemberBase = {
+    name: formData.get("name") as string,
+    age: Number(formData.get("age")),
+    email: formData.get("email") as string,
+    address: formData.get("address") as string,
+    password: password,
+    role: "user",
+  };
+
+  try {
+    const response = await memberRepo.update(id, member);
+
+    if (!response) {
+      return {
+        error: "Error: Failed to update member",
+      };
+    }
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return { error: error.errors[0].message || "Invalid input" };
+    } else if ((error as Error).message) {
+      return { error: `${(error as Error).message}` };
+    }
+
+    return { error: "An unexpected error occurred" };
+  }
+  revalidatePath(`/admin/members`);
+  redirect("/admin/members");
+}
+
 export async function deleteBook(id: number) {
   try {
     const deletedBook = await bookRepo.delete(id);
@@ -304,16 +360,28 @@ export async function getBookById(id: number) {
   }
 }
 
+export async function getMemberById(id: number) {
+  try {
+    const member = await memberRepo.getById(id);
+    if (!member) {
+      throw new Error("failed to fetch member");
+    }
+    return member;
+  } catch (err) {
+    console.error("an unexpected error occured");
+  }
+}
+
 export async function getUserDetails() {
   const session = await auth();
-  const user = session!.user;
-  const email = user!.email;
+  const user = session?.user;
+  const email = user?.email;
   try {
     const userDetails = await memberRepo.getByEmail(email as string);
     if (!userDetails) {
       throw new Error("User details not be found");
     }
-    return { userDetails };
+    return userDetails;
   } catch (error) {
     console.error("Error finding details of user", error);
   }
@@ -322,8 +390,11 @@ export async function getUserDetails() {
 export async function createBookRequest(id: number) {
   try {
     const user = await getUserDetails();
+    if (!user) {
+      return { error: "failed to fetch user details" };
+    }
     const transactionData: ITransactionBase = {
-      memberId: BigInt(user?.userDetails.id!),
+      memberId: BigInt(user?.id),
       bookId: BigInt(id),
     };
     const response = await transactionRepo.create(transactionData);

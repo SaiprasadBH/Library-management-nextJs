@@ -47,7 +47,7 @@ function NavLinks() {
       <Link href="/books" className="hover:underline">
         Books
       </Link>
-      <Link href="/mybooks" className="hover:underline">
+      <Link href="/my-books" className="hover:underline">
         My Books
       </Link>
       <Link href="/profile" className="hover:underline">
