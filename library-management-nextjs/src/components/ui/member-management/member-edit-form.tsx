@@ -81,7 +81,7 @@ export default function MemberEditForm({ member }: { member: IMember }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Change Password</Label>
             <Input
               id="password"
               name="password"

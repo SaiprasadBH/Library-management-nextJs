@@ -44,19 +44,19 @@ export default function UserLayout({
 function NavLinks() {
   return (
     <>
-      <Link href="/books" className="hover:underline">
+      <Link href="/user/books" className="hover:underline">
         Books
       </Link>
-      <Link href="/my-books" className="hover:underline">
+      <Link href="/user/my-books" className="hover:underline">
         My Books
       </Link>
-      <Link href="/profile" className="hover:underline">
+      <Link href="/user/profile" className="hover:underline">
         My Profile
       </Link>
-      <Link href="/my-requests" className="hover:underline">
+      <Link href="/user/my-requests" className="hover:underline">
         My Requests
       </Link>
-      <Link href="/my-transactions" className="hover:underline">
+      <Link href="/user/my-transactions" className="hover:underline">
         My Transactions
       </Link>
     </>

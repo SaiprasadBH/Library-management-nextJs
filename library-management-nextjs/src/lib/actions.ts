@@ -52,8 +52,10 @@ export async function authenticate(
       email: formData.get("email"),
       password: formData.get("password"),
     });
+    const session = await auth();
     if (result) {
-      redirect("/admin/books");
+      if (session?.user.role === "admin") redirect("/admin/books");
+      redirect("/user/books");
     }
   } catch (error) {
     if (error instanceof AuthError) {

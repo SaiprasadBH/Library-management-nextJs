@@ -1,27 +1,34 @@
 import NextAuth, { User } from "next-auth";
-import { authConfig } from "./auth.config";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import { IMember } from "../src/lib/definitions";
+import { IMember } from "@/lib/definitions";
 import { z } from "zod";
+import Google from "next-auth/providers/google";
+import { GoogleProfile } from "next-auth/providers/google";
+import { authConfig } from "./auth.config";
 import { MemberRepository } from "./lib/repositories/member.repository";
 import { drizzleAdapter } from "./lib/database/drizzle-orm/drizzleMysqlAdapter";
-import Google from "next-auth/providers/google";
-import { createMember } from "./lib/actions";
+import { hashPassword } from "./lib/hashing/passwordHashing";
+import { IMemberBase } from "./lib/database/zod/member.schema";
 
-function mapMemberToUser(member: IMember): User {
-  return {
-    id: member.id.toString(),
-    name: member.name,
-    email: member.email,
-  };
-}
+const memberRepo = new MemberRepository(drizzleAdapter);
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  ...authConfig,
+  pages: {
+    signIn: "/login",
+  },
   providers: [
-    Google,
+    Google({
+      profile(profile: GoogleProfile) {
+        return { role: profile.role ?? "user", ...profile };
+      },
+    }),
     CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "email", type: "email" },
+        password: { label: "password", type: "password" },
+      },
       authorize: async (credentials) => {
         const parsedCredentials = z
           .object({ email: z.string().email(), password: z.string().min(6) })
@@ -35,7 +42,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const { email, password } = parsedCredentials.data;
 
         try {
-          const memberRepo = new MemberRepository(drizzleAdapter);
           const user = await memberRepo.getByEmail(email);
           if (!user) {
             console.log("User not found");
@@ -48,7 +54,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return null;
           }
 
-          return mapMemberToUser(user);
+          const userData = {
+            id: user.id.toString(),
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          };
+          console.log("User data: ", userData);
+          return userData;
         } catch (error) {
           console.error("Error during authentication:", error);
           return null;
@@ -57,21 +70,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
+    ...authConfig.callbacks,
+
     async signIn({ user, account }) {
       if (account?.provider === "google") {
         try {
-          if (user) {
-            const memberRepo = new MemberRepository(drizzleAdapter);
-            const existingUser = await memberRepo.getByEmail(user.email!);
+          if (user.email && user.name) {
+            const existingUser = await memberRepo.getByEmail(user.email);
+
+            let userDetails: IMemberBase;
             if (!existingUser) {
-              const result = await memberRepo.create({
-                name: user.name!,
-                email: user.email!,
+              userDetails = {
+                name: user.name,
+                email: user.email,
                 age: 18,
-                password: "GoogleLogin@123",
+                password: await hashPassword("GooglePassword@123"),
                 role: "user",
                 address: "default address",
-              });
+              };
+              const result = await memberRepo.create(userDetails);
             }
           }
         } catch (error) {
@@ -83,3 +100,4 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
   },
 });
+export { NextAuth };
