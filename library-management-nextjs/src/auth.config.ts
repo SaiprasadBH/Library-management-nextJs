@@ -31,6 +31,10 @@ export const authConfig = {
 
       const isOnDashboard = nextUrl.pathname.startsWith("/user");
       const isOnAdminRoute = nextUrl.pathname.startsWith("/admin");
+      const isOnRegister = nextUrl.pathname.startsWith("/register");
+      if (isOnRegister) {
+        return true;
+      }
 
       if (isLoggedIn) {
         if (isAdmin) {

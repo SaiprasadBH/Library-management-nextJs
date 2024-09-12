@@ -298,4 +298,28 @@ export class TransactionRepository
       },
     };
   }
+
+  async listMemberSpecificRequestedBooks(memberId: number) {
+    try {
+      const db = await this.dbConnFactory.getPoolConnection();
+      const whereClause = eq(transactions.memberId, BigInt(memberId));
+
+      // Fetch transactions and join with books table to get title and author
+      const items = await db
+        .select({
+          id: transactions.id,
+          title: books.title,
+          author: books.author,
+          date: transactions.dateOfIssue,
+          status: transactions.bookStatus,
+        })
+        .from(transactions)
+        .innerJoin(books, eq(books.id, transactions.bookId))
+        .where(whereClause);
+
+      return items;
+    } catch (error) {
+      throw new Error((error as Error).message);
+    }
+  }
 }

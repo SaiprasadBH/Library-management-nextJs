@@ -17,8 +17,8 @@ interface UserSpecificRequestsProps {
   id: number;
   title: string;
   author: string;
-  date: string;
-  status: "issued" | "rejected" | "pending";
+  date: string | null;
+  status: "issued" | "rejected" | "pending" | "returned";
 }
 export default function UserSpecificRequests({
   books,

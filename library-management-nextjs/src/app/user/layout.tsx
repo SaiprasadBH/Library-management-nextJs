@@ -54,9 +54,6 @@ function NavLinks() {
         My Profile
       </Link>
       <Link href="/user/my-requests" className="hover:underline">
-        My Requests
-      </Link>
-      <Link href="/user/my-transactions" className="hover:underline">
         My Transactions
       </Link>
     </>

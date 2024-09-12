@@ -163,7 +163,7 @@ export async function fetchMembers(
 }
 export async function fetchRequests(params: IPageRequest) {
   try {
-    const result = transactionRepo.listRequests(params);
+    const result = await transactionRepo.listRequests(params);
     if (!result) {
       throw new Error("No transaction returned from repository");
     } else {
@@ -176,7 +176,7 @@ export async function fetchRequests(params: IPageRequest) {
 
 export async function fetchNonPendingTransactions(params: IPageRequest) {
   try {
-    const result = transactionRepo.listNonPendingTransactions(params);
+    const result = await transactionRepo.listNonPendingTransactions(params);
     if (!result) {
       throw new Error("No transaction returned from repository");
     } else {
@@ -184,6 +184,19 @@ export async function fetchNonPendingTransactions(params: IPageRequest) {
     }
   } catch (error) {
     console.error("Error in listing transaction", error);
+  }
+}
+
+export async function fetchMemberSpecificBookRequestsWithStatus(
+  memberId: number
+) {
+  try {
+    const result = await transactionRepo.listMemberSpecificRequestedBooks(
+      memberId
+    );
+    return result;
+  } catch (error) {
+    console.error((error as Error).message);
   }
 }
 
