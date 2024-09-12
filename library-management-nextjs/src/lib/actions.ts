@@ -240,13 +240,20 @@ export async function updateMember(
   prevState: any,
   formData: FormData
 ) {
-  const password = await hashPassword(formData.get("password") as string);
+  let newPassword;
+  if (!formData.get("password")) {
+    const user = await memberRepo.getByEmail(formData.get("email") as string);
+    newPassword = user?.password;
+  } else {
+    newPassword = await hashPassword(formData.get("password") as string);
+  }
+
   const member: IMemberBase = {
     name: formData.get("name") as string,
     age: Number(formData.get("age")),
     email: formData.get("email") as string,
     address: formData.get("address") as string,
-    password: password,
+    password: newPassword!,
     role: "user",
   };
 

@@ -5,13 +5,14 @@ export const authConfig = {
     signIn: "/login", // Redirect to this page for sign-in
   },
   callbacks: {
-    jwt({ token, user }) {
+    jwt({ token, user, profile }) {
       if (user) {
         const userData = {
           id: user?.id,
           name: user?.name,
           email: user?.email,
           role: user?.role,
+          image: profile?.picture,
         };
         token = { ...userData };
       }

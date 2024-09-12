@@ -1,6 +1,6 @@
 "use client";
 
-import { IMember, IMemberBase } from "@/lib/definitions";
+import { IMember } from "@/lib/definitions";
 import {
   Card,
   CardContent,
@@ -12,15 +12,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SaveIcon } from "lucide-react";
+import { useState } from "react";
 import { useActionState } from "react";
 import { updateMember } from "@/lib/actions";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 export default function MemberEditForm({ member }: { member: IMember }) {
   const initialState = { success: false, error: "" };
@@ -30,6 +24,11 @@ export default function MemberEditForm({ member }: { member: IMember }) {
     UpdateMemberWithId,
     initialState
   );
+
+  const [isPasswordVisible, setPasswordVisible] = useState(false);
+
+  // Toggle password input visibility
+  const handlePasswordToggle = () => setPasswordVisible(!isPasswordVisible);
 
   return (
     <Card className="w-full max-w-2xl">
@@ -68,7 +67,8 @@ export default function MemberEditForm({ member }: { member: IMember }) {
               name="email"
               type="email"
               defaultValue={member.email}
-              className="border-0 px-0 shadow-none focus-visible:ring-0"
+              readOnly
+              className="border-0 px-0 shadow-none focus-visible:ring-0 bg-gray-100 cursor-not-allowed"
             />
           </div>
           <div className="space-y-2">
@@ -81,14 +81,24 @@ export default function MemberEditForm({ member }: { member: IMember }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Change Password</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              defaultValue={member.password}
-              className="border-0 px-0 shadow-none focus-visible:ring-0"
-            />
+            {/* Toggle Password Input */}
+            <Button
+              type="button"
+              onClick={handlePasswordToggle}
+              variant="outline"
+              className="w-full"
+            >
+              Change Password
+            </Button>
+            {isPasswordVisible && (
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Enter new password"
+                className="border-0 px-0 shadow-none focus-visible:ring-0 mt-2"
+              />
+            )}
           </div>
         </CardContent>
         <CardFooter>
