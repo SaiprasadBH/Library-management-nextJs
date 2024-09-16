@@ -4,7 +4,6 @@ import { Card, CardContent, CardFooter } from "./card";
 import { Label } from "./label";
 import { Input } from "./input";
 import { Textarea } from "./textarea";
-import { Select } from "./select";
 import { Button } from "./button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
