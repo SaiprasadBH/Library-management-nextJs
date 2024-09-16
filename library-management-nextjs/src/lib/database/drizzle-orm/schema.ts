@@ -31,7 +31,7 @@ export const members = mysqlTable("members", {
   role: mysqlEnum("role", ["user", "admin", "librarian"]).notNull(),
 });
 
-// Transactions Table
+//transaction table
 export const transactions = mysqlTable("transactions", {
   id: serial("id"),
   memberId: bigint("memberId", { mode: "bigint", unsigned: true })
@@ -40,16 +40,9 @@ export const transactions = mysqlTable("transactions", {
   bookId: bigint("bookId", { mode: "bigint", unsigned: true })
     .references(() => books.id, { onDelete: "cascade" })
     .notNull(),
-  bookStatus: varchar("bookStatus", { length: 35 }).notNull(),
-  dateOfIssue: varchar("dateOfIssue", { length: 15 }).notNull(),
-  dueDate: varchar("dueDate", { length: 15 }).notNull(),
-});
-
-export const refreshTokensAndIp = mysqlTable("refreshTokensAndIp", {
-  id: serial("id").primaryKey().notNull(), // Auto-incremented primary key
-  refresh_token: varchar("refresh_token", { length: 255 }),
-  email: varchar("email", { length: 255 }).references(() => members.email, {
-    onDelete: "cascade",
-  }),
-  ip: varchar("ipAddress", { length: 255 }),
+  bookStatus: varchar("bookStatus", {
+    length: 35,
+    enum: ["pending", "rejected", "issued", "returned"],
+  }).notNull(),
+  dateOfIssue: varchar("dateOfIssue", { length: 15 }),
 });
