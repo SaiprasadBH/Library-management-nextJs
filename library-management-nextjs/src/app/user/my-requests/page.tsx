@@ -1,32 +1,26 @@
 import { useState } from "react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import UserSpecificRequests from "@/components/ui/transaction-management/filter-user-requests";
-import PaginationControl from "@/components/ui/paginationControl";
 import {
   fetchMemberSpecificBookRequestsWithStatus,
   getUserDetails,
 } from "@/lib/actions";
 
-const user = await getUserDetails();
-if (!user) {
-  console.error("failed to current user");
-}
-const sampleBooks = await fetchMemberSpecificBookRequestsWithStatus(user?.id!);
+export default async function Page() {
+  const user = await getUserDetails();
 
-export default function Page() {
+  if (!user) {
+    console.error("Failed to fetch current user");
+    return <p>Failed to load user details</p>;
+  }
+
+  const sampleBooks = await fetchMemberSpecificBookRequestsWithStatus(
+    user?.id!
+  );
+
   return (
     <div>
-      {sampleBooks ? (
-        <UserSpecificRequests books={sampleBooks}></UserSpecificRequests>
+      {sampleBooks?.length ? (
+        <UserSpecificRequests books={sampleBooks} />
       ) : (
         <p>No Transactions present as of Now</p>
       )}
