@@ -58,12 +58,13 @@ export const DeleteButton = ({
 
     setIsOpen(false);
   };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
           <Button variant="ghost" size="icon">
-            <TrashIcon className="h-4 w-4" />
+            <TrashIcon className="h-4 w-4 text-red-500" />
           </Button>
         </DialogTrigger>
         <DialogContent>
@@ -78,14 +79,19 @@ export const DeleteButton = ({
             <Button variant="outline" onClick={() => setIsOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleDelete}>Delete</Button>
+
+            <Button
+              className="bg-red-500 text-white hover:bg-red-600"
+              onClick={handleDelete}
+            >
+              Delete
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
   );
 };
-
 export function EditButton({ url }: { url: string }) {
   return (
     <Link href={url}>
