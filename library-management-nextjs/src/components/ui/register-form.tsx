@@ -7,9 +7,6 @@ import { Textarea } from "./textarea";
 import { Button } from "./button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { IMemberBase } from "@/lib/definitions";
-import { MemberBaseSchema } from "@/lib/database/zod/member.schema";
-import { ZodError } from "zod";
 import { registerUser } from "@/lib/actions";
 import { Alert, AlertDescription } from "./alert";
 import { AlertCircle } from "lucide-react";
@@ -24,77 +21,105 @@ export default function RegisterForm() {
       router.push("/login");
     }
   }, [state.success, router]);
+
   return (
-    <div className="mx-auto max-w-[500px] space-y-6 py-12 px-4 md:px-6 lg:px-0">
-      <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold">Register</h1>
-        <p className="text-muted-foreground">
-          Create a new account to get started.
-        </p>
-      </div>
-      <Card>
-        <form action={formAction}>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" name="name" placeholder="John Doe" required />
+    <div className="min-h-screen bg-muted flex items-center justify-center py-12 px-6 lg:px-8">
+      <div className="max-w-lg w-full space-y-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold">Register</h1>
+          <p className="mt-2 text-muted-foreground">
+            Create a new account to get started.
+          </p>
+        </div>
+        <Card className="rounded-lg">
+          <form action={formAction} className="space-y-6">
+            <CardContent className="p-6 space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    placeholder="John Doe"
+                    required
+                    className="mt-1 block w-full"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="age">Age</Label>
+                  <Input
+                    id="age"
+                    name="age"
+                    type="number"
+                    placeholder="30"
+                    required
+                    className="mt-1 block w-full"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="age">Age</Label>
+              <div>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="age"
-                  name="age"
-                  type="number"
-                  placeholder="30"
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="m@example.com"
                   required
+                  className="mt-1 block w-full"
                 />
               </div>
+              <div>
+                <Label htmlFor="address">Address</Label>
+                <Textarea
+                  id="address"
+                  name="address"
+                  placeholder="123 Main St, Anytown USA"
+                  required
+                  className="mt-1 block w-full"
+                />
+              </div>
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  className="mt-1 block w-full"
+                />
+              </div>
+            </CardContent>
+            <CardFooter className="px-6 py-4 flex items-center justify-end">
+              <Button type="submit" className="ml-auto">
+                Register
+              </Button>
+            </CardFooter>
+            {/* Reserved space for error message */}
+            <div className="px-6">
+              <div
+                className={`min-h-[40px] ${state.error ? "block" : "hidden"}`}
+              >
+                {state.error && (
+                  <Alert variant="destructive" className="overflow-hidden">
+                    <div className="flex items-start">
+                      <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                      <AlertDescription className="ml-2 text-sm max-w-full break-words">
+                        {state.error}
+                      </AlertDescription>
+                    </div>
+                  </Alert>
+                )}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
-              <Textarea
-                id="address"
-                name="address"
-                placeholder="123 Main St, Anytown USA"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" required />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" className="ml-auto">
-              {"Register"}
-            </Button>
-            {state.error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{state.error}</AlertDescription>
-              </Alert>
-            )}
-          </CardFooter>
-        </form>
-      </Card>
-      <div className="text-center text-sm text-muted-foreground">
-        Already have an account?{" "}
-        <Link href="/login" className="underline" prefetch={false}>
-          Login
-        </Link>
+          </form>
+        </Card>
+        <div className="text-center text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <Link href="/login" className="underline hover:text-primary">
+            Login
+          </Link>
+        </div>
       </div>
-      <div className="text-red-600"></div>
     </div>
   );
 }

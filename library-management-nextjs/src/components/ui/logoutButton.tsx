@@ -14,7 +14,7 @@ export function LogoutButton({ className = "" }: { className?: string }) {
         variant="secondary"
         size="sm"
         type="submit"
-        className={`bg-primary-foreground text-primary hover:bg-primary-foreground/90 ${className}`}
+        className={`bg-primary-foreground text-primary hover:bg-primary-foreground/90 border-none rounded-md px-4 py-2 ${className}`}
       >
         <LogOut className="h-4 w-4 mr-1" />
         Logout
