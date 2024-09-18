@@ -33,11 +33,11 @@ import { MySql2Database } from "drizzle-orm/mysql2";
 
 const memberRepo = new MemberRepository(drizzleAdapter);
 const bookRepo = new BookRepository(drizzleAdapter);
-const connection = await drizzleAdapter.getPoolConnection();
+const connection = await drizzleAdapter.getConnection();
 const transactionRepo = new TransactionRepository(drizzleAdapter);
 
 export async function fetchAllBooks() {
-  const dbConnection = await drizzleAdapter.getPoolConnection();
+  const dbConnection = await drizzleAdapter.getConnection();
   const booksArray = dbConnection.select().from(books);
   return booksArray;
 }
@@ -358,7 +358,7 @@ export async function createMember(prevState: any, formData: FormData) {
       email: formData.get("email") as string,
       address: formData.get("address") as string,
       password: await hashPassword(formData.get("password") as string),
-      role: formData.get("role") as "admin" | "librarian" | "user",
+      role: formData.get("role") as "admin" | "user",
     };
 
     const response = await memberRepo.create(member);

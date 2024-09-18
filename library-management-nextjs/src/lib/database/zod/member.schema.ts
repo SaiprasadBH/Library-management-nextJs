@@ -32,7 +32,7 @@ export const MemberBaseSchema = z.object({
         message: "Password must contain at least one special character",
       }
     ),
-  role: z.enum(["user", "admin", "librarian"]),
+  role: z.enum(["user", "admin"]),
 });
 
 export const MemberSchema = MemberBaseSchema.extend({

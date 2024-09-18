@@ -16,11 +16,12 @@ export class MemberRepository implements IRepository<IMemberBase, IMember> {
   async create(data: IMemberBase): Promise<IMember | undefined> {
     const validatedData = MemberBaseSchema.parse(data);
 
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection();
     const [insertedMember] = await db
       .insert(members)
-      .values(validatedData as IMember);
-    const resultedMember = await this.getById(insertedMember.insertId);
+      .values(validatedData as IMember)
+      .returning({ id: members.id });
+    const resultedMember = await this.getById(insertedMember.id);
 
     return resultedMember;
   }
@@ -37,7 +38,7 @@ export class MemberRepository implements IRepository<IMemberBase, IMember> {
       ...validatedData,
     };
 
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection();
     await db.update(members).set(newData).where(eq(members.id, memberId));
 
     return newData as IMember;
@@ -46,14 +47,14 @@ export class MemberRepository implements IRepository<IMemberBase, IMember> {
   async delete(memberId: number): Promise<IMember | undefined> {
     const deletedMember = await this.getById(memberId);
 
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection();
     await db.delete(members).where(eq(members.id, memberId));
 
     return deletedMember;
   }
 
   async getById(memberId: number): Promise<IMember | undefined> {
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection();
     const [selectedMember] = await db
       .select()
       .from(members)
@@ -64,7 +65,7 @@ export class MemberRepository implements IRepository<IMemberBase, IMember> {
   }
 
   async getByEmail(email: string): Promise<IMember | undefined> {
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection();
     const [selectedMember] = await db
       .select()
       .from(members)
@@ -74,7 +75,7 @@ export class MemberRepository implements IRepository<IMemberBase, IMember> {
   }
 
   async getBooks(memberId: number): Promise<IBook[] | undefined> {
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection();
     const whereClause = and(
       eq(transactions.memberId, BigInt(memberId)), // Convert memberId to BigInt for compatibility
       eq(transactions.bookStatus, "issued") // Check if the status is 'issued'
@@ -94,7 +95,7 @@ export class MemberRepository implements IRepository<IMemberBase, IMember> {
   async list(
     params: IPageRequest
   ): Promise<IPagedResponse<IMember> | undefined> {
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection();
     let searchWhereClause;
 
     if (params.search) {
@@ -128,7 +129,7 @@ export class MemberRepository implements IRepository<IMemberBase, IMember> {
     memberId: number,
     params: IPageRequest
   ): Promise<IPagedResponse<IBook>> {
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection();
 
     // Define the whereClause using 'and' to combine the conditions
     const whereClause = and(

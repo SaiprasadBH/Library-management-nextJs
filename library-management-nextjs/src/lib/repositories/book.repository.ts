@@ -19,16 +19,16 @@ export class BookRepository implements IRepository<IBookBase, IBook> {
   async create(newBookdata: IBookBase): Promise<IBook | undefined> {
     let validatedData: Partial<IBook> = BookSchemaBase.parse(newBookdata);
     validatedData = {
-      id: 0,
       ...validatedData,
       availableNumOfCopies: validatedData.totalNumOfCopies,
     };
 
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection(); // Updated to use getConnection
     const [insertedBook] = await db
       .insert(books)
-      .values(validatedData as IBook);
-    const resultedBook = await this.getById(insertedBook.insertId);
+      .values(validatedData as IBook)
+      .returning({ id: books.id });
+    const resultedBook = await this.getById(insertedBook.id);
 
     return resultedBook;
   }
@@ -51,7 +51,7 @@ export class BookRepository implements IRepository<IBookBase, IBook> {
         (oldData.totalNumOfCopies - newData.availableNumOfCopies),
     };
 
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection(); // Updated to use getConnection
     await db.update(books).set(updatedData).where(eq(books.id, bookId));
 
     return updatedData;
@@ -60,14 +60,14 @@ export class BookRepository implements IRepository<IBookBase, IBook> {
   async delete(bookId: number): Promise<IBook | undefined> {
     const deletedBook = await this.getById(bookId);
 
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection(); // Updated to use getConnection
     await db.delete(books).where(eq(books.id, bookId));
 
     return deletedBook;
   }
 
   async getById(bookId: number): Promise<IBook | undefined> {
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection(); // Updated to use getConnection
     const [selectedBook] = await db
       .select()
       .from(books)
@@ -78,7 +78,7 @@ export class BookRepository implements IRepository<IBookBase, IBook> {
   }
 
   async list(params: IPageRequest): Promise<IPagedResponse<IBook> | undefined> {
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection(); // Updated to use getConnection
     let searchWhereClause;
 
     // Define the orderByColumn based on the sortField parameter

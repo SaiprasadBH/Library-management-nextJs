@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1726653722097,
+      "tag": "20240918100202_volatile_sabretooth",
+      "breakpoints": true
+    }
+  ]
+}

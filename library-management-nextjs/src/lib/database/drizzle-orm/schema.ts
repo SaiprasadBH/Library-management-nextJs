@@ -1,48 +1,70 @@
+import { drizzle } from "drizzle-orm/vercel-postgres";
+import { sql } from "@vercel/postgres";
 import {
-  mysqlTable,
-  int,
-  varchar,
+  pgTable,
   serial,
+  text,
+  integer,
   bigint,
-  mysqlEnum,
-} from "drizzle-orm/mysql-core";
+  pgEnum,
+  varchar,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
+import { number } from "zod";
+import { int } from "drizzle-orm/mysql-core";
 
 // Books Table
-export const books = mysqlTable("books", {
-  id: serial("id"),
+export const books = pgTable("books", {
+  id: serial("id").primaryKey(),
   title: varchar("title", { length: 35 }).notNull(),
   author: varchar("author", { length: 35 }).notNull(),
   publisher: varchar("publisher", { length: 35 }).notNull(),
   genre: varchar("genre", { length: 35 }).notNull(),
   isbnNo: varchar("isbnNo", { length: 13 }).notNull(),
-  numOfPages: int("numOfPages").notNull(),
-  totalNumOfCopies: int("totalNumOfCopies").notNull(),
-  availableNumOfCopies: int("availableNumOfCopies").notNull(),
+  numOfPages: integer("numOfPages").notNull(),
+  totalNumOfCopies: integer("totalNumOfCopies").notNull(),
+  availableNumOfCopies: integer("availableNumOfCopies").notNull(),
+  price: integer("price"),
+  imageURL: varchar("imageURL", { length: 255 }),
 });
 
 // Members Table
-export const members = mysqlTable("members", {
-  id: serial("id"),
-  name: varchar("name", { length: 35 }).notNull(),
-  age: int("age").notNull(),
-  email: varchar("email", { length: 255 }).notNull().unique(),
-  address: varchar("address", { length: 35 }).notNull(),
-  password: varchar("password", { length: 255 }).notNull(), // Hashed password column
-  role: mysqlEnum("role", ["user", "admin", "librarian"]).notNull(),
-});
 
-//transaction table
-export const transactions = mysqlTable("transactions", {
-  id: serial("id"),
-  memberId: bigint("memberId", { mode: "bigint", unsigned: true })
+export const roleEnum = pgEnum("role", ["user", "admin"]);
+export const statusEnum = pgEnum("status", [
+  "returned",
+  "issued",
+  "pending",
+  "rejected",
+]);
+
+export const members = pgTable(
+  "members",
+  {
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 35 }).notNull(),
+    age: integer("age").notNull(),
+    email: varchar("email", { length: 255 }).notNull(),
+    address: varchar("address", { length: 35 }).notNull(),
+    password: varchar("password", { length: 255 }).notNull(),
+    role: roleEnum("role").notNull(),
+  },
+  (members) => {
+    return {
+      uniqueEmailIdx: uniqueIndex("unique_email_idx").on(members.email),
+    };
+  }
+);
+
+// Transactions Table
+export const transactions = pgTable("transactions", {
+  id: serial("id").primaryKey(),
+  memberId: bigint("memberId", { mode: "bigint" })
     .references(() => members.id, { onDelete: "cascade" })
     .notNull(),
-  bookId: bigint("bookId", { mode: "bigint", unsigned: true })
+  bookId: bigint("bookId", { mode: "bigint" })
     .references(() => books.id, { onDelete: "cascade" })
     .notNull(),
-  bookStatus: varchar("bookStatus", {
-    length: 35,
-    enum: ["pending", "rejected", "issued", "returned"],
-  }).notNull(),
+  bookStatus: statusEnum("status").notNull(),
   dateOfIssue: varchar("dateOfIssue", { length: 15 }),
 });

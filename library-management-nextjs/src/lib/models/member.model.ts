@@ -4,7 +4,7 @@ export interface IMemberBase {
   email: string;
   address: string;
   password: string;
-  role: "admin" | "librarian" | "user";
+  role: "admin" | "user";
 }
 export interface IMember extends IMemberBase {
   id: number;
