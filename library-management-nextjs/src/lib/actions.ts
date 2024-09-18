@@ -121,10 +121,13 @@ export async function fetchBooks(
     if (!result) {
       throw new Error("No books returned from repository");
     }
+    revalidatePath("/user/books");
+
     return result;
   } catch (error) {
     console.error("Error fetching books:", error);
     throw new Error("Failed to fetch books");
+  } finally {
   }
 }
 
@@ -354,7 +357,7 @@ export async function createMember(prevState: any, formData: FormData) {
       age: Number(formData.get("age")),
       email: formData.get("email") as string,
       address: formData.get("address") as string,
-      password: formData.get("password") as string,
+      password: await hashPassword(formData.get("password") as string),
       role: formData.get("role") as "admin" | "librarian" | "user",
     };
 

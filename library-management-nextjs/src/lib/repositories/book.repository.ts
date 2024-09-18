@@ -11,7 +11,7 @@ import {
   books,
   IDrizzleAdapter,
 } from "../database/drizzle-orm/drizzleMysqlAdapter";
-import { eq, like, sql } from "drizzle-orm";
+import { asc, desc, eq, like, sql } from "drizzle-orm";
 
 export class BookRepository implements IRepository<IBookBase, IBook> {
   constructor(private readonly dbConnFactory: IDrizzleAdapter) {}
@@ -81,18 +81,51 @@ export class BookRepository implements IRepository<IBookBase, IBook> {
     const db = await this.dbConnFactory.getPoolConnection();
     let searchWhereClause;
 
-    if (params.search) {
-      const search = `%${params.search.toLowerCase()}%`;
-      searchWhereClause = sql`${books.title} LIKE ${search} OR ${books.isbnNo} LIKE ${search}`;
+    // Define the orderByColumn based on the sortField parameter
+    let orderByColumn;
+    switch (params.sortField) {
+      case "title":
+        orderByColumn = books.title; // Column from drizzle-orm
+        break;
+      case "author":
+        orderByColumn = books.author; // Column from drizzle-orm
+        break;
+      case "publisher":
+        orderByColumn = books.publisher; // Column from drizzle-orm
+        break;
+      case "genre":
+        orderByColumn = books.genre; // Column from drizzle-orm
+        break;
+      case "isbnNo":
+        orderByColumn = books.isbnNo; // Column from drizzle-orm
+        break;
+      default:
+        orderByColumn = books.title; // Default to title if no valid sort field is provided
+        break;
     }
 
+    // Set the sort direction (default to ascending if not provided)
+    const orderDirection =
+      params.sortDirection === "desc"
+        ? desc(orderByColumn)
+        : asc(orderByColumn);
+
+    // Apply search filtering if the search query is provided
+    if (params.search) {
+      const search = `%${params.search.toLowerCase()}%`;
+      searchWhereClause = sql`${books.title} LIKE ${search} OR ${books.isbnNo} LIKE ${search} OR ${books.author} LIKE ${search} OR ${books.genre} LIKE ${search}`;
+    }
+
+    // Fetch items with sorting and pagination
     const items = await db
       .select()
       .from(books)
       .where(searchWhereClause)
+      .orderBy(orderDirection)
       .offset(params.offset)
       .limit(params.limit);
 
+    // Fetch total count for pagination
     const [{ count: total }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(books)

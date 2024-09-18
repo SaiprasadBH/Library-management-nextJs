@@ -55,6 +55,8 @@ export default async function BooksPage({
               title={book.title}
               author={book.author}
               bookId={book.id}
+              availableNumOfCopies={book.availableNumOfCopies}
+              totalNumOfCopies={book.totalNumOfCopies}
             />
           ))}
         </div>

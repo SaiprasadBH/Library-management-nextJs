@@ -1,10 +1,10 @@
-import { auth } from "@/auth";
 import { BookCard } from "@/components/ui/book-mangement/book-card";
 import PaginationControl from "@/components/ui/paginationControl";
 import Search from "@/components/ui/search";
 import { fetchBooks } from "@/lib/actions";
 import { IPagedResponse, IPageRequest } from "@/lib/core/pagination";
 import { IBook } from "@/lib/definitions";
+import BooksClient from "@/components/ui/book-mangement/bookClient";
 
 export default async function BooksPage({
   searchParams,
@@ -12,23 +12,28 @@ export default async function BooksPage({
   searchParams?: {
     query?: string;
     page?: string;
+    sortField?: string;
+    sortDirection?: string;
   };
 }) {
-  const session = await auth();
-  console.log(session?.user.role);
-  let currentPage = Number(searchParams?.page) || 1;
+  const currentPage = Number(searchParams?.page) || 1;
   const query = searchParams?.query || "";
+  const sortField = searchParams?.sortField || "title";
+  const sortDirection = searchParams?.sortDirection || "asc";
   const limit = 8;
 
   const listParameters: IPageRequest = {
     search: query,
     offset: (currentPage - 1) * limit,
     limit: limit,
+    sortField,
+    sortDirection,
   };
 
   const paginatedBooks: IPagedResponse<IBook> = await fetchBooks(
     listParameters
   );
+
   const paginationOptions = paginatedBooks.pagination;
   const books = paginatedBooks.items;
 
@@ -44,20 +49,15 @@ export default async function BooksPage({
       <div className="mb-10">
         <Search placeholder="Search for a book" />
       </div>
-      {books.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {books.map((book) => (
-            <BookCard
-              key={book.id}
-              title={book.title}
-              author={book.author}
-              bookId={book.id}
-            />
-          ))}
-        </div>
-      ) : (
-        <p>No books found</p>
-      )}
+      {/* Pass data and pagination to the client component */}
+      <BooksClient
+        books={books}
+        paginationOptions={paginationOptions}
+        currentPage={currentPage}
+        query={query}
+        sortField={sortField}
+        sortDirection={sortDirection}
+      />
     </main>
   );
 }
