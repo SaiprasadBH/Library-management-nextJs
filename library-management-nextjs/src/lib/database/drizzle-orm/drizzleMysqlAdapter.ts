@@ -1,46 +1,22 @@
-import { drizzle, MySql2Database } from "drizzle-orm/mysql2";
-import mysql from "mysql2/promise";
+import { sql } from "@vercel/postgres"; // `@vercel/postgres` package for connecting to PostgreSQL
 import { AppEnvs } from "../../core/read-env";
 import { members, books, transactions } from "./schema";
-
+import "@/lib/database/drizzle-orm/envConfig";
+import * as schema from "@/lib/database/drizzle-orm/schema";
+import { VercelPgDatabase } from "drizzle-orm/vercel-postgres";
+import { drizzle } from "drizzle-orm/vercel-postgres";
 export interface IDrizzleAdapter {
-  getStandaloneConnection: () => Promise<
-    MySql2Database<Record<string, unknown>>
-  >;
-  getPoolConnection: () => Promise<MySql2Database<Record<string, unknown>>>;
+  getConnection: () => Promise<VercelPgDatabase<typeof schema>>;
 }
 
 export class DrizzleAdapter implements IDrizzleAdapter {
-  private standaloneConnection: ReturnType<typeof drizzle> | undefined;
-  private poolConnection: ReturnType<typeof drizzle> | undefined;
-  private dbUrl: string | undefined;
+  constructor() {}
 
-  constructor(dbUrl: string) {
-    this.dbUrl = dbUrl;
-  }
-
-  async getStandaloneConnection() {
-    if (!this.standaloneConnection) {
-      const databaseUrl = this.dbUrl;
-      const connection = await mysql.createConnection({
-        uri: databaseUrl,
-      });
-      this.standaloneConnection = drizzle(connection);
-    }
-    return this.standaloneConnection;
-  }
-
-  async getPoolConnection() {
-    if (!this.poolConnection) {
-      const databaseUrl = this.dbUrl;
-      const pool = mysql.createPool({
-        uri: databaseUrl,
-      });
-      this.poolConnection = drizzle(pool);
-    }
-    return this.poolConnection;
+  async getConnection() {
+    const connection = drizzle(sql, { schema });
+    return connection;
   }
 }
 
-const drizzleAdapter = new DrizzleAdapter(AppEnvs.DATABASE_URL);
+const drizzleAdapter = new DrizzleAdapter();
 export { drizzleAdapter, members, books, transactions };

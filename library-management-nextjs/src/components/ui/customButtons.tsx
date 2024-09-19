@@ -149,7 +149,7 @@ export async function LargeBorrowButton({ bookId }: { bookId: number }) {
 
   return (
     <form action={formAction}>
-      <Button className="mt-4 md:mt-6 lg:mt-8">Borrow</Button>
+      <Button className="mt-4 md:mt-6 lg:mt-8 w-full">Borrow</Button>
     </form>
   );
 }

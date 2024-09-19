@@ -33,11 +33,11 @@ import { MySql2Database } from "drizzle-orm/mysql2";
 
 const memberRepo = new MemberRepository(drizzleAdapter);
 const bookRepo = new BookRepository(drizzleAdapter);
-const connection = await drizzleAdapter.getPoolConnection();
+const connection = await drizzleAdapter.getConnection();
 const transactionRepo = new TransactionRepository(drizzleAdapter);
 
 export async function fetchAllBooks() {
-  const dbConnection = await drizzleAdapter.getPoolConnection();
+  const dbConnection = await drizzleAdapter.getConnection();
   const booksArray = dbConnection.select().from(books);
   return booksArray;
 }
@@ -121,10 +121,13 @@ export async function fetchBooks(
     if (!result) {
       throw new Error("No books returned from repository");
     }
+    revalidatePath("/user/books");
+
     return result;
   } catch (error) {
     console.error("Error fetching books:", error);
     throw new Error("Failed to fetch books");
+  } finally {
   }
 }
 
@@ -354,8 +357,8 @@ export async function createMember(prevState: any, formData: FormData) {
       age: Number(formData.get("age")),
       email: formData.get("email") as string,
       address: formData.get("address") as string,
-      password: formData.get("password") as string,
-      role: formData.get("role") as "admin" | "librarian" | "user",
+      password: await hashPassword(formData.get("password") as string),
+      role: formData.get("role") as "admin" | "user",
     };
 
     const response = await memberRepo.create(member);

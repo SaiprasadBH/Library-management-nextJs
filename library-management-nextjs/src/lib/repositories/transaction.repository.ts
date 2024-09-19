@@ -44,7 +44,7 @@ export class TransactionRepository
       dateOfIssue: new Date().toISOString().split("T")[0],
     };
 
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection();
     try {
       const createdTransaction: ITransaction = await db.transaction(
         async (tx) => {
@@ -74,7 +74,7 @@ export class TransactionRepository
       throw new Error("Transaction not found.");
     }
 
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection();
 
     // If the status is "rejected", fetch the book and update the available copies
     if (bookStatus === "rejected" || bookStatus === "returned") {
@@ -125,7 +125,7 @@ export class TransactionRepository
       );
     }
 
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection();
     try {
       const updatedTransaction = await db.transaction(async (tx) => {
         await tx.delete(transactions).where(eq(transactions.id, id));
@@ -139,7 +139,7 @@ export class TransactionRepository
   }
 
   async getById(transactionId: number): Promise<ITransaction | undefined> {
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection();
     const [selectedTransaction] = await db
       .select()
       .from(transactions)
@@ -154,7 +154,7 @@ export class TransactionRepository
   }
 
   async list(params: IPageRequest): Promise<IPagedResponse<ITransaction>> {
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection();
     let searchWhereClause;
 
     if (params.search) {
@@ -186,7 +186,7 @@ export class TransactionRepository
   async listRequests(
     params: IPageRequest
   ): Promise<IPagedResponse<ITransaction>> {
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection();
     let searchWhereClause;
 
     // Always include the condition for bookStatus = 'pending'
@@ -224,7 +224,7 @@ export class TransactionRepository
   async listNonPendingTransactions(
     params: IPageRequest
   ): Promise<IPagedResponse<ITransaction>> {
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection();
     let searchWhereClause;
 
     // Search for non-pending transactions
@@ -262,7 +262,7 @@ export class TransactionRepository
   async listIssuedTransactions(
     params: IPageRequest
   ): Promise<IPagedResponse<ITransaction>> {
-    const db = await this.dbConnFactory.getPoolConnection();
+    const db = await this.dbConnFactory.getConnection();
     let searchWhereClause;
 
     // Search for transactions with bookStatus = 'issued'
@@ -301,7 +301,7 @@ export class TransactionRepository
 
   async listMemberSpecificRequestedBooks(memberId: number) {
     try {
-      const db = await this.dbConnFactory.getPoolConnection();
+      const db = await this.dbConnFactory.getConnection();
       const whereClause = eq(transactions.memberId, BigInt(memberId));
 
       // Fetch transactions and join with books table to get title and author

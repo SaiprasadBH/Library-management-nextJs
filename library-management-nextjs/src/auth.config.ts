@@ -2,7 +2,7 @@ import type { NextAuthConfig, Session } from "next-auth";
 
 export const authConfig = {
   pages: {
-    signIn: "/login", // Redirect to this page for sign-in
+    signIn: "/", // Redirect to this page for sign-in
   },
   callbacks: {
     jwt({ token, user, profile }) {
@@ -33,7 +33,8 @@ export const authConfig = {
       const isOnDashboard = nextUrl.pathname.startsWith("/user");
       const isOnAdminRoute = nextUrl.pathname.startsWith("/admin");
       const isOnRegister = nextUrl.pathname.startsWith("/register");
-      if (isOnRegister) {
+      const isOnLogin = nextUrl.pathname.startsWith("/login");
+      if (isOnRegister || isOnLogin) {
         return true;
       }
 
