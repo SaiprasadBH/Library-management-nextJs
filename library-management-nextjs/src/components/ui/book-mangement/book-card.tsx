@@ -9,7 +9,7 @@ interface BookCardProps {
   title: string;
   author: string;
   bookId: number;
-  price?: number;
+  price?: number | null | undefined;
   availableNumOfCopies: number;
   totalNumOfCopies: number;
   imageUrl?: string; // Optional prop for image URL
