@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -13,14 +14,16 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import { useActionState } from "react";
 import { createBook } from "@/lib/actions";
+import { UploadButton } from "@/utils/uploadting";
 
 export default function BookCreateForm() {
   const initialState = { success: false, error: undefined };
-
   const [createState, createFormAction] = useActionState(
     createBook,
     initialState
   );
+
+  const [imageUrl, setImageUrl] = useState(""); // Track image URL
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -72,6 +75,22 @@ export default function BookCreateForm() {
               />
             </div>
           </div>
+
+          {/* New Price Field */}
+          <div className="space-y-2">
+            <Label htmlFor="price">Price</Label>
+            <Input
+              id="price"
+              name="price"
+              type="number"
+              step="0.01"
+              min="0"
+              required
+              placeholder="Enter price in Rupees"
+              className="w-full"
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="totalNumOfCopies">Total Copies</Label>
             <Input
@@ -80,6 +99,35 @@ export default function BookCreateForm() {
               type="number"
               required
               className="w-full"
+            />
+          </div>
+
+          {/* Upload Image Section */}
+          <div className="space-y-2">
+            <Label htmlFor="bookImage">Upload an image</Label>
+            <UploadButton
+              className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-500 rounded-lg px-4 py-2 width-auto"
+              endpoint="imageUploader"
+              onClientUploadComplete={(res) => {
+                const uploadedUrl = res[0]?.url; // Assuming first file's URL is needed
+                setImageUrl(uploadedUrl); // Set image URL in state
+                alert("Upload Completed");
+              }}
+              onUploadError={(error: Error) => {
+                alert(`ERROR! ${error.message}`);
+              }}
+            />
+          </div>
+
+          {/* Image URL Input (Read-only) */}
+          <div className="space-y-2">
+            <Label htmlFor="imageUrl">Image URL</Label>
+            <Input
+              id="imageUrl"
+              name="imageUrl"
+              value={imageUrl} // Set the input value from state
+              readOnly
+              className="w-full bg-gray-100 cursor-not-allowed"
             />
           </div>
         </CardContent>
