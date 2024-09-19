@@ -48,13 +48,7 @@ export class TransactionRepository
       const createdTransaction: ITransaction = await db.transaction(
         async (tx) => {
           const [result] = await tx
-            .select({
-              id: transactions.id,
-              memberId: transactions.memberId,
-              bookId: transactions.bookId,
-              bookStatus: transactions.bookStatus,
-              dateOfIssue: transactions.dateOfIssue,
-            })
+            .select()
             .from(transactions)
             .where(eq(transactions.bookId, validatedData.bookId));
           await tx.insert(transactions).values(newTransaction as ITransaction);

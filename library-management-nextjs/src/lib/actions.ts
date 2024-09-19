@@ -331,14 +331,15 @@ export async function createBook(prevState: any, formData: FormData) {
       publisher: formData.get("publisher") as string,
       genre: formData.get("genre") as string,
       isbnNo: formData.get("isbnNo") as string,
-      numOfPages: Number(formData.get("numofPages")),
+      numOfPages: Number(formData.get("numOfPages")),
       totalNumOfCopies: Number(formData.get("totalNumOfCopies")),
     };
 
     const response = await bookRepo.create(book);
     if (!response) {
-      throw new Error("failed to create book");
+      throw new Error("Failed to create book");
     }
+
     return { success: true };
   } catch (error) {
     if (error instanceof ZodError) {
@@ -350,6 +351,7 @@ export async function createBook(prevState: any, formData: FormData) {
     return { error: "An unexpected error occurred" };
   }
 }
+
 export async function createMember(prevState: any, formData: FormData) {
   try {
     const member: IMemberBase = {
