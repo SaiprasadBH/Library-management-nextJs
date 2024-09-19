@@ -36,8 +36,7 @@ export class TransactionRepository
       availableNumOfCopies: book.availableNumOfCopies - 1,
     };
 
-    const newTransaction: ITransaction = {
-      id: 0,
+    const newTransaction = {
       memberId: BigInt(validatedData.memberId),
       bookId: BigInt(validatedData.bookId),
       bookStatus: "pending",
@@ -52,7 +51,7 @@ export class TransactionRepository
             .select()
             .from(transactions)
             .where(eq(transactions.bookId, validatedData.bookId));
-          await tx.insert(transactions).values(newTransaction);
+          await tx.insert(transactions).values(newTransaction as ITransaction);
           return result;
         }
       );

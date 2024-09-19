@@ -75,6 +75,7 @@ export default function BooksClient({
               bookId={book.id}
               availableNumOfCopies={book.availableNumOfCopies}
               totalNumOfCopies={book.totalNumOfCopies}
+              price={book.price}
             />
           ))}
         </div>

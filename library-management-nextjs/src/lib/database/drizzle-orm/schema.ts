@@ -10,8 +10,6 @@ import {
   varchar,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
-import { number } from "zod";
-import { int } from "drizzle-orm/mysql-core";
 
 // Books Table
 export const books = pgTable("books", {
@@ -31,7 +29,7 @@ export const books = pgTable("books", {
 // Members Table
 
 export const roleEnum = pgEnum("role", ["user", "admin"]);
-export const statusEnum = pgEnum("status", [
+export const statusEnum = pgEnum("bookStatus", [
   "returned",
   "issued",
   "pending",
@@ -65,6 +63,6 @@ export const transactions = pgTable("transactions", {
   bookId: bigint("bookId", { mode: "bigint" })
     .references(() => books.id, { onDelete: "cascade" })
     .notNull(),
-  bookStatus: statusEnum("status").notNull(),
+  bookStatus: statusEnum("bookStatus").notNull(),
   dateOfIssue: varchar("dateOfIssue", { length: 15 }),
 });
