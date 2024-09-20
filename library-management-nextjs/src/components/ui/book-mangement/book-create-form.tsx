@@ -23,25 +23,58 @@ export default function BookCreateForm() {
     initialState
   );
 
-  const [imageUrl, setImageUrl] = useState(""); // Track image URL
+  const [imageUrl, setImageUrl] = useState("");
+
+  // Added state for each input field to preserve data on errors
+  const [formData, setFormData] = useState({
+    title: "",
+    author: "",
+    publisher: "",
+    genre: "",
+    isbnNo: "",
+    numOfPages: "",
+    price: "",
+    totalNumOfCopies: "",
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader className="space-y-1">
+    <Card className="w-full max-w-2xl mx-auto shadow-lg rounded-xl">
+      <CardHeader className="space-y-1 pb-0">
         <CardTitle className="text-2xl font-bold text-center">
           Create New Book
         </CardTitle>
       </CardHeader>
       <form action={createFormAction}>
-        <CardContent className="grid gap-4 sm:gap-6">
+        <CardContent className="grid gap-6 p-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
-              <Input id="title" name="title" required className="w-full" />
+              <Input
+                id="title"
+                name="title"
+                required
+                value={formData.title} // preserve value
+                onChange={handleInputChange}
+                className="w-full"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="author">Author</Label>
-              <Input id="author" name="author" required className="w-full" />
+              <Input
+                id="author"
+                name="author"
+                required
+                value={formData.author} // preserve value
+                onChange={handleInputChange}
+                className="w-full"
+              />
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -51,18 +84,34 @@ export default function BookCreateForm() {
                 id="publisher"
                 name="publisher"
                 required
+                value={formData.publisher} // preserve value
+                onChange={handleInputChange}
                 className="w-full"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="genre">Genre</Label>
-              <Input id="genre" name="genre" required className="w-full" />
+              <Input
+                id="genre"
+                name="genre"
+                required
+                value={formData.genre} // preserve value
+                onChange={handleInputChange}
+                className="w-full"
+              />
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="isbnNo">ISBN Number</Label>
-              <Input id="isbnNo" name="isbnNo" required className="w-full" />
+              <Input
+                id="isbnNo"
+                name="isbnNo"
+                required
+                value={formData.isbnNo} // preserve value
+                onChange={handleInputChange}
+                className="w-full"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="numOfPages">Number of Pages</Label>
@@ -71,6 +120,8 @@ export default function BookCreateForm() {
                 name="numOfPages"
                 type="number"
                 required
+                value={formData.numOfPages} // preserve value
+                onChange={handleInputChange}
                 className="w-full"
               />
             </div>
@@ -86,6 +137,8 @@ export default function BookCreateForm() {
               step="0.01"
               min="0"
               required
+              value={formData.price} // preserve value
+              onChange={handleInputChange}
               placeholder="Enter price in Rupees"
               className="w-full"
             />
@@ -98,40 +151,44 @@ export default function BookCreateForm() {
               name="totalNumOfCopies"
               type="number"
               required
+              value={formData.totalNumOfCopies} // preserve value
+              onChange={handleInputChange}
               className="w-full"
             />
           </div>
 
           {/* Upload Image Section */}
-          <div className="space-y-2">
-            <Label htmlFor="bookImage">Upload an image</Label>
-            <UploadButton
-              className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-500 rounded-lg px-4 py-2 width-auto"
-              endpoint="imageUploader"
-              onClientUploadComplete={(res) => {
-                const uploadedUrl = res[0]?.url; // Assuming first file's URL is needed
-                setImageUrl(uploadedUrl); // Set image URL in state
-                alert("Upload Completed");
-              }}
-              onUploadError={(error: Error) => {
-                alert(`ERROR! ${error.message}`);
-              }}
-            />
-          </div>
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <div className="space-y-2 w-full sm:w-auto">
+              <Label htmlFor="bookImage">Upload an image</Label>
+              <UploadButton
+                className="w-full sm:w-auto bg-primary text-white hover:bg-primary-dark focus:ring-4 focus:ring-primary-light rounded-lg px-4 py-2"
+                endpoint="imageUploader"
+                onClientUploadComplete={(res) => {
+                  const uploadedUrl = res[0]?.url;
+                  setImageUrl(uploadedUrl);
+                  alert("Upload Completed");
+                }}
+                onUploadError={(error: Error) => {
+                  alert(`ERROR! ${error.message}`);
+                }}
+              />
+            </div>
 
-          {/* Image URL Input (Read-only) */}
-          <div className="space-y-2">
-            <Label htmlFor="imageUrl">Image URL</Label>
-            <Input
-              id="imageUrl"
-              name="imageUrl"
-              value={imageUrl} // Set the input value from state
-              readOnly
-              className="w-full bg-gray-100 cursor-not-allowed"
-            />
+            {/* Image URL Input (No border, next to upload button) */}
+            <div className="space-y-2 w-full sm:w-auto">
+              <Label htmlFor="imageUrl">Image URL</Label>
+              <Input
+                id="imageUrl"
+                name="imageUrl"
+                value={imageUrl}
+                readOnly
+                className="w-full sm:w-60 bg-gray-100 text-gray-600 cursor-not-allowed border-0"
+              />
+            </div>
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
+        <CardFooter className="flex flex-col space-y-4 p-6">
           <Button type="submit" className="w-full sm:w-auto sm:min-w-[200px]">
             <PlusIcon className="mr-2 h-4 w-4" />
             Create Book

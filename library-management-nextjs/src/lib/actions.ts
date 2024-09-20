@@ -10,6 +10,7 @@ import {
   IMemberBase,
   ITransaction,
   ITransactionBase,
+  IBookBase,
 } from "./definitions";
 import { IMember, MemberBaseSchema } from "./database/zod/member.schema";
 import { hashPassword } from "./hashing/passwordHashing";
@@ -24,7 +25,6 @@ import {
   BookSchema,
   BookSchemaBase,
   BookUpdateSchema,
-  IBookBase,
 } from "./database/zod/book.schema";
 import { error } from "console";
 import { revalidatePath } from "next/cache";
@@ -216,6 +216,10 @@ export async function updateBook(
     isbnNo: formData.get("isbnNo") as string,
     numOfPages: Number(formData.get("numOfPages")),
     totalNumOfCopies: Number(formData.get("totalNumOfCopies")),
+    price: Number(formData.get("price")),
+    imageURL: formData.get("imageUrl")
+      ? (formData.get("imageUrl") as string)
+      : "",
   };
   try {
     const response = await bookRepo.update(id, book);
@@ -325,6 +329,11 @@ export async function deleteTransaction(id: number) {
 
 export async function createBook(prevState: any, formData: FormData) {
   try {
+    console.log("the url received through form data", formData.get("imageUrl"));
+    console.log(
+      "the price value recieved through form data is",
+      formData.get("price")
+    );
     const book: IBookBase = {
       title: formData.get("title") as string,
       author: formData.get("author") as string,
@@ -333,6 +342,8 @@ export async function createBook(prevState: any, formData: FormData) {
       isbnNo: formData.get("isbnNo") as string,
       numOfPages: Number(formData.get("numOfPages")),
       totalNumOfCopies: Number(formData.get("totalNumOfCopies")),
+      price: Number(formData.get("price")),
+      imageURL: formData.get("imageUrl") as string,
     };
 
     const response = await bookRepo.create(book);
