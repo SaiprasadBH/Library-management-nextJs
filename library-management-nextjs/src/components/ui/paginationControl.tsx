@@ -1,11 +1,8 @@
 "use client";
 
 import React from "react";
-import { Pagination, PaginationContent, PaginationItem } from "./pagination";
-import { Button } from "./button";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { useSearchParams, usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
 
 interface PaginationProps {
   currentPage: number;
@@ -16,63 +13,37 @@ interface PaginationProps {
   };
 }
 
-const PaginationControl = ({ currentPage, options }: PaginationProps) => {
+export function PaginationControl({ currentPage, options }: PaginationProps) {
   const totalPages = Math.ceil(options.total / options.limit);
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
 
-  const handlePrevPage = () => {
+  const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams);
-    if (currentPage > 1) {
-      params.set("page", (currentPage - 1).toString());
-      replace(`${pathname}?${params.toString()}`);
-    }
-  };
-
-  const handleNextPage = () => {
-    const params = new URLSearchParams(searchParams);
-    if (currentPage < totalPages) {
-      params.set("page", (currentPage + 1).toString());
-      replace(`${pathname}?${params.toString()}`);
-    }
+    params.set("page", newPage.toString());
+    replace(`${pathname}?${params.toString()}`);
   };
 
   return (
-    <>
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={handlePrevPage}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeftIcon className="h-4 w-4" />
-              <span className="sr-only">Previous</span>
-            </Button>
-          </PaginationItem>
-          <PaginationItem>
-            <span className="px-2">
-              Page {currentPage} of {totalPages}
-            </span>
-          </PaginationItem>
-          <PaginationItem>
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages}
-            >
-              <ChevronRightIcon className="h-4 w-4" />
-              <span className="sr-only">Next</span>
-            </Button>
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    </>
+    <div className="flex items-center space-x-2">
+      <button
+        onClick={() => handlePageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="p-2 rounded-full bg-slate-800 text-gray-300 hover:bg-teal-400/10 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <ChevronLeftIcon className="h-5 w-5" />
+      </button>
+      <span className="text-gray-300">
+        Page {currentPage} of {totalPages}
+      </span>
+      <button
+        onClick={() => handlePageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="p-2 rounded-full bg-slate-800 text-gray-300 hover:bg-teal-400/10 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <ChevronRightIcon className="h-5 w-5" />
+      </button>
+    </div>
   );
-};
-
-export default PaginationControl;
+}
