@@ -76,6 +76,7 @@ export default function BooksClient({
               availableNumOfCopies={book.availableNumOfCopies}
               totalNumOfCopies={book.totalNumOfCopies}
               price={book.price}
+              imageUrl={book.imageURL ? book.imageURL : ""}
             />
           ))}
         </div>

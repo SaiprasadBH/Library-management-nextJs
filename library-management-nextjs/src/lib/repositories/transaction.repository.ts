@@ -158,7 +158,7 @@ export class TransactionRepository
 
     if (params.search) {
       const search = `%${params.search.toLowerCase()}%`;
-      searchWhereClause = sql`${transactions.bookId} LIKE ${search} OR ${transactions.memberId} LIKE ${search}`;
+      searchWhereClause = sql`${transactions.bookId} ILIKE ${search} OR ${transactions.memberId} ILIKE ${search}`;
     }
 
     const items = await db
@@ -192,7 +192,7 @@ export class TransactionRepository
     if (params.search) {
       const search = `%${params.search.toLowerCase()}%`;
       // Include the search condition and bookStatus = 'pending' together
-      searchWhereClause = sql`${transactions.bookStatus} = 'pending' AND (${transactions.bookId} LIKE ${search} OR ${transactions.memberId} LIKE ${search})`;
+      searchWhereClause = sql`${transactions.bookStatus} = 'pending' AND (${transactions.bookId} ILIKE ${search} OR ${transactions.memberId} ILIKE ${search})`;
     } else {
       // If no search, only filter by bookStatus = 'pending'
       searchWhereClause = sql`${transactions.bookStatus} = 'pending'`;
@@ -230,7 +230,7 @@ export class TransactionRepository
     if (params.search) {
       const search = `%${params.search.toLowerCase()}%`;
       // Exclude transactions with bookStatus = 'pending' and apply search criteria
-      searchWhereClause = sql`${transactions.bookStatus} != 'pending' AND (${transactions.bookId} LIKE ${search} OR ${transactions.memberId} LIKE ${search})`;
+      searchWhereClause = sql`${transactions.bookStatus} != 'pending' AND (${transactions.bookId} ILIKE ${search} OR ${transactions.memberId} ILIKE ${search})`;
     } else {
       // If no search term is provided, just filter by non-pending transactions
       searchWhereClause = sql`${transactions.bookStatus} != 'pending'`;
@@ -267,7 +267,7 @@ export class TransactionRepository
     // Search for transactions with bookStatus = 'issued'
     if (params.search) {
       const search = `%${params.search.toLowerCase()}%`;
-      searchWhereClause = sql`${transactions.bookStatus} = 'issued' AND (${transactions.bookId} LIKE ${search} OR ${transactions.memberId} LIKE ${search})`;
+      searchWhereClause = sql`${transactions.bookStatus} = 'issued' AND (${transactions.bookId} ILIKE ${search} OR ${transactions.memberId} ILIKE ${search})`;
     } else {
       // If no search term is provided, filter only by 'issued' transactions
       searchWhereClause = sql`${transactions.bookStatus} = 'issued'`;

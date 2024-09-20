@@ -113,7 +113,7 @@ export class BookRepository implements IRepository<IBookBase, IBook> {
     // Apply search filtering if the search query is provided
     if (params.search) {
       const search = `%${params.search.toLowerCase()}%`;
-      searchWhereClause = sql`${books.title} ILIKE ${search} OR ${books.isbnNo} LIKE ${search} OR ${books.author} LIKE ${search} OR ${books.genre} LIKE ${search}`;
+      searchWhereClause = sql`${books.title} ILIKE ${search} OR ${books.isbnNo} ILIKE ${search} OR ${books.author} ILIKE ${search} OR ${books.genre} ILIKE ${search}`;
     }
 
     // Fetch items with sorting and pagination
