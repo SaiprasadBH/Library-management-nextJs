@@ -82,15 +82,6 @@ function NavLinks() {
       >
         My Profile
       </Link>
-<<<<<<< HEAD
-      <Link
-        href="/user/my-requests"
-        className="text-sm font-medium text-gray-300 hover:text-teal-400 transition-all"
-      >
-        My Transactions
-      </Link>
-=======
->>>>>>> c755e45 (refactored UI for user role)
     </>
   );
 }
