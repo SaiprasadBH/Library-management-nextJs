@@ -1,6 +1,6 @@
 import { BookCard } from "@/components/ui/book-mangement/book-card";
-import PaginationControl from "@/components/ui/paginationControl";
-import Search from "@/components/ui/search";
+import { PaginationControl } from "@/components/ui/paginationControl";
+import { Search } from "@/components/ui/search";
 import {
   fetchBooks,
   fetchUserSpecificBooks,

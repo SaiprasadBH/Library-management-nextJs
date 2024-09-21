@@ -1,6 +1,3 @@
-import { BookCard } from "@/components/ui/book-mangement/book-card";
-import PaginationControl from "@/components/ui/paginationControl";
-import Search from "@/components/ui/search";
 import { fetchBooks } from "@/lib/actions";
 import { IPagedResponse, IPageRequest } from "@/lib/core/pagination";
 import { IBook } from "@/lib/definitions";
@@ -20,7 +17,7 @@ export default async function BooksPage({
   const query = searchParams?.query || "";
   const sortField = searchParams?.sortField || "title";
   const sortDirection = searchParams?.sortDirection || "asc";
-  const limit = 8;
+  const limit = 12; // Increased from 8 to 12 for better space utilization
 
   const listParameters: IPageRequest = {
     search: query,
@@ -34,30 +31,23 @@ export default async function BooksPage({
     listParameters
   );
 
-  const paginationOptions = paginatedBooks.pagination;
+  const paginationOptions = paginatedBooks;
   const books = paginatedBooks.items;
 
   return (
-    <main className="flex-1 overflow-auto p-8">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-10">
-        <h1 className="text-3xl mb-3 sm:mb-0 font-serif lg:text-6xl">Books</h1>
-        <PaginationControl
+    <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 text-gray-100">
+      <div className="container mx-auto ">
+        {" "}
+        {/* Increased max-width */}
+        <BooksClient
+          books={books}
+          paginationOptions={paginationOptions}
           currentPage={currentPage}
-          options={paginationOptions}
+          query={query}
+          sortField={sortField}
+          sortDirection={sortDirection}
         />
       </div>
-      <div className="mb-10">
-        <Search placeholder="Search for a book" />
-      </div>
-      {/* Pass data and pagination to the client component */}
-      <BooksClient
-        books={books}
-        paginationOptions={paginationOptions}
-        currentPage={currentPage}
-        query={query}
-        sortField={sortField}
-        sortDirection={sortDirection}
-      />
     </main>
   );
 }
