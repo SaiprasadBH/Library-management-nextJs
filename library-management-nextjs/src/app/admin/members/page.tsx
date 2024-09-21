@@ -1,8 +1,8 @@
 import { fetchMembers } from "@/lib/actions";
 import { IPagedResponse, IPageRequest } from "@/lib/core/pagination";
 import { IMember, IMemberBase } from "@/lib/definitions";
-import PaginationControl from "@/components/ui/paginationControl";
-import Search from "@/components/ui/search";
+import { PaginationControl } from "@/components/ui/paginationControl";
+import { Search } from "@/components/ui/search";
 import { Button } from "@/components/ui/button";
 import {
   Table,

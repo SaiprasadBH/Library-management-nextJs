@@ -1,7 +1,7 @@
 import { fetchRequests } from "@/lib/actions";
 import { IPagedResponse, IPageRequest } from "@/lib/core/pagination";
-import PaginationControl from "@/components/ui/paginationControl";
-import Search from "@/components/ui/search";
+import { PaginationControl } from "@/components/ui/paginationControl";
+import { Search } from "@/components/ui/search";
 import {
   Table,
   TableBody,

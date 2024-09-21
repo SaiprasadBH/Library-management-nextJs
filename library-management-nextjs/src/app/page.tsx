@@ -63,7 +63,7 @@ export default function Component() {
               className="text-center space-y-8"
             >
               <h1 className="text-5xl md:text-7xl font-bold leading-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-300">
-                Elevate Your Library <br /> with Granthalaya
+                Enhance Your Knowledge <br /> with Granthalaya
               </h1>
               <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto font-light">
                 Experience the future of library management. Streamline
