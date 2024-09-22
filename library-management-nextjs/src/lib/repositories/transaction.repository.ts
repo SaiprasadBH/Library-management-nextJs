@@ -8,6 +8,7 @@ import {
   drizzleAdapter,
   transactions,
   books,
+  members,
 } from "@/lib/database/drizzle-orm/drizzleMysqlAdapter";
 import { eq, sql } from "drizzle-orm";
 import { IPagedResponse, IPageRequest } from "../core/pagination";
@@ -182,29 +183,44 @@ export class TransactionRepository
       },
     };
   }
-  async listRequests(
-    params: IPageRequest
-  ): Promise<IPagedResponse<ITransaction>> {
+  async listRequests(params: IPageRequest) {
     const db = await this.dbConnFactory.getConnection();
     let searchWhereClause;
 
     // Always include the condition for bookStatus = 'pending'
     if (params.search) {
       const search = `%${params.search.toLowerCase()}%`;
-      // Include the search condition and bookStatus = 'pending' together
-      searchWhereClause = sql`${transactions.bookStatus} = 'pending' AND (${transactions.bookId} ILIKE ${search} OR ${transactions.memberId} ILIKE ${search})`;
+      // Search for bookStatus = 'pending' and apply search filters
+      searchWhereClause = sql`${transactions.bookStatus} = 'pending' 
+        AND (
+          ${transactions.bookId} ILIKE ${search} 
+          OR ${members.name} ILIKE ${search}
+          OR ${members.email} ILIKE ${search}
+          OR ${books.title} ILIKE ${search}
+          OR ${books.isbnNo} ILIKE ${search}
+        )`;
     } else {
-      // If no search, only filter by bookStatus = 'pending'
+      // If no search term is provided, filter only by 'pending' transactions
       searchWhereClause = sql`${transactions.bookStatus} = 'pending'`;
     }
 
+    // Perform the join with members and books to fetch all necessary information
     const items = await db
-      .select()
+      .select({
+        id: transactions.id,
+        memberName: members.name,
+        memberEmail: members.email,
+        bookTitle: books.title,
+        bookStatus: transactions.bookStatus,
+      })
       .from(transactions)
+      .leftJoin(members, sql`${transactions.memberId} = ${members.id}`)
+      .leftJoin(books, sql`${transactions.bookId} = ${books.id}`)
       .where(searchWhereClause)
       .offset(params.offset)
       .limit(params.limit);
 
+    // Fetch the total count of pending requests
     const [{ count: total }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(transactions)
@@ -220,25 +236,40 @@ export class TransactionRepository
     };
   }
 
-  async listNonPendingTransactions(
-    params: IPageRequest
-  ): Promise<IPagedResponse<ITransaction>> {
+  async listNonPendingTransactions(params: IPageRequest) {
     const db = await this.dbConnFactory.getConnection();
     let searchWhereClause;
 
-    // Search for non-pending transactions
+    // Prepare search clause if search is provided
     if (params.search) {
       const search = `%${params.search.toLowerCase()}%`;
-      // Exclude transactions with bookStatus = 'pending' and apply search criteria
-      searchWhereClause = sql`${transactions.bookStatus} != 'pending' AND (${transactions.bookId} ILIKE ${search} OR ${transactions.memberId} ILIKE ${search})`;
+      // Filter by non-pending status and apply search on books and members
+      searchWhereClause = sql`${transactions.bookStatus} != 'pending' 
+        AND (
+          ${transactions.bookId} ILIKE ${search} 
+          OR ${members.name} ILIKE ${search} 
+          OR ${members.email} ILIKE ${search} 
+          OR ${books.title} ILIKE ${search}
+          OR ${books.isbnNo} ILIKE ${search}
+        )`;
     } else {
-      // If no search term is provided, just filter by non-pending transactions
+      // Filter only by non-pending transactions
       searchWhereClause = sql`${transactions.bookStatus} != 'pending'`;
     }
 
+    // Perform the join with members and books
     const items = await db
-      .select()
+      .select({
+        id: transactions.id,
+        memberName: members.name,
+        memberEmail: members.email,
+        bookTitle: books.title,
+        isbn: books.isbnNo,
+        bookStatus: transactions.bookStatus,
+      })
       .from(transactions)
+      .leftJoin(members, sql`${transactions.memberId} = ${members.id}`)
+      .leftJoin(books, sql`${transactions.bookId} = ${books.id}`)
       .where(searchWhereClause)
       .offset(params.offset)
       .limit(params.limit);
@@ -258,25 +289,39 @@ export class TransactionRepository
     };
   }
 
-  async listIssuedTransactions(
-    params: IPageRequest
-  ): Promise<IPagedResponse<ITransaction>> {
+  async listIssuedTransactions(params: IPageRequest) {
     const db = await this.dbConnFactory.getConnection();
     let searchWhereClause;
 
     // Search for transactions with bookStatus = 'issued'
     if (params.search) {
       const search = `%${params.search.toLowerCase()}%`;
-      searchWhereClause = sql`${transactions.bookStatus} = 'issued' AND (${transactions.bookId} ILIKE ${search} OR ${transactions.memberId} ILIKE ${search})`;
+      searchWhereClause = sql`${transactions.bookStatus} = 'issued' 
+        AND (
+          ${transactions.bookId} ILIKE ${search} 
+          OR ${members.name} ILIKE ${search}
+          OR ${members.email} ILIKE ${search}
+          OR ${books.title} ILIKE ${search}
+          OR ${books.isbnNo} ILIKE ${search}
+        )`;
     } else {
       // If no search term is provided, filter only by 'issued' transactions
       searchWhereClause = sql`${transactions.bookStatus} = 'issued'`;
     }
 
-    // Fetch the issued transactions
+    // Perform the join with members and books
     const items = await db
-      .select()
+      .select({
+        id: transactions.id,
+        memberName: members.name,
+        memberEmail: members.email,
+        bookTitle: books.title,
+        isbn: books.isbnNo,
+        bookStatus: transactions.bookStatus,
+      })
       .from(transactions)
+      .leftJoin(members, sql`${transactions.memberId} = ${members.id}`)
+      .leftJoin(books, sql`${transactions.bookId} = ${books.id}`)
       .where(searchWhereClause)
       .offset(params.offset)
       .limit(params.limit);

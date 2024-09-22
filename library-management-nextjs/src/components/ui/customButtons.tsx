@@ -63,23 +63,28 @@ export const DeleteButton = ({
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <TrashIcon className="h-4 w-4 text-red-500" />
+          <Button variant="ghost" size="icon" className="hover:bg-red-500/20">
+            <TrashIcon className="h-4 w-4 text-red-400" />
           </Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="bg-gray-800 text-gray-100 border border-gray-700">
           <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-teal-400">
+              Confirm Deletion
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
               Are you sure you want to delete &quot;{name}&quot;? This action
               cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+              className="bg-gray-700 text-gray-200 hover:bg-gray-600"
+            >
               Cancel
             </Button>
-
             <Button
               className="bg-red-500 text-white hover:bg-red-600"
               onClick={handleDelete}
@@ -92,10 +97,15 @@ export const DeleteButton = ({
     </>
   );
 };
+
 export function EditButton({ url }: { url: string }) {
   return (
     <Link href={url}>
-      <Button size="sm" variant="outline">
+      <Button
+        size="sm"
+        variant="outline"
+        className="bg-gray-700 text-teal-400 hover:bg-gray-600 border-teal-500"
+      >
         <Edit className="h-4 w-4 mr-2" />
         Edit
       </Button>
@@ -103,13 +113,14 @@ export function EditButton({ url }: { url: string }) {
   );
 }
 
-export async function BorrowButton({ bookId }: { bookId: number }) {
+export function BorrowButton({ bookId }: { bookId: number }) {
   async function formAction() {
     const state = await createBookRequest(bookId);
     if (state.success) {
       toast({
         title: "Success",
         description: "Book requested successfully",
+        className: "bg-teal-400 text-gray-900",
       });
     } else if (state.error || !state.success) {
       toast({
@@ -122,9 +133,14 @@ export async function BorrowButton({ bookId }: { bookId: number }) {
 
   return (
     <form action={formAction}>
-      <Button size="sm" variant="outline" type="submit">
+      <Button
+        size="sm"
+        variant="outline"
+        type="submit"
+        className="bg-gray-700 text-cyan-400 hover:bg-gray-600 border-cyan-500"
+      >
         <BookOpen className="h-4 w-4 mr-2" />
-        {"Borrow"}
+        Borrow
       </Button>
     </form>
   );
@@ -165,6 +181,7 @@ export async function ApproveButton({
       toast({
         title: "Success",
         description: "Request approved successfully",
+        className: "bg-teal-400 text-gray-900",
       });
     } else if (state.error || !state.success) {
       toast({
@@ -177,7 +194,7 @@ export async function ApproveButton({
 
   return (
     <form action={formAction}>
-      <Button className="bg-green-500 hover:bg-green-600 text-white">
+      <Button className="bg-gradient-to-r from-teal-400 to-cyan-300 hover:from-teal-500 hover:to-cyan-400 text-gray-900 font-bold transition-all duration-300 transform hover:scale-105 w-full sm:w-auto">
         <CheckCircle className="mr-2 h-4 w-4" />
         Approve
       </Button>
@@ -196,6 +213,7 @@ export async function RejectButton({
       toast({
         title: "Success",
         description: "Request Rejected successfully",
+        className: "bg-teal-400 text-gray-900",
       });
     } else if (state.error || !state.success) {
       toast({
@@ -208,7 +226,7 @@ export async function RejectButton({
 
   return (
     <form action={formAction}>
-      <Button className="bg-red-500 hover:bg-red-600 text-white">
+      <Button className="bg-red-500 hover:bg-red-600 text-white font-bold transition-all duration-300 transform hover:scale-105 w-full sm:w-auto">
         <XCircle className="mr-2 h-4 w-4" />
         Reject
       </Button>
@@ -227,6 +245,7 @@ export async function ReturnButton({
       toast({
         title: "Success",
         description: "Book returned successfully",
+        className: "bg-teal-400 text-gray-900",
       });
     } else if (state.error || !state.success) {
       toast({
@@ -239,7 +258,7 @@ export async function ReturnButton({
 
   return (
     <form action={formAction}>
-      <Button className="bg-primary hover:bg-primary/90 text-white">
+      <Button className="bg-gradient-to-r from-teal-400 to-cyan-300 hover:from-teal-500 hover:to-cyan-400 text-gray-900 font-bold transition-all duration-300 transform hover:scale-105">
         <BookOpen className="mr-2 h-4 w-4" />
         Return
       </Button>
