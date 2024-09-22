@@ -10,40 +10,41 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Increase the navbar height */}
-      <nav className="bg-primary text-primary-foreground h-20 shadow-md">
-        <div className="flex justify-between items-center w-full h-full">
-          {/* Align Granthalaya to the leftmost side */}
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 text-gray-100">
+      {/* Navbar */}
+      <nav className="bg-gray-900/80 backdrop-blur-md shadow-lg h-20 z-50 fixed top-0 w-full">
+        <div className="flex justify-between items-center w-full h-full px-6">
+          {/* Logo */}
           <Link
             href="/admin"
-            className="text-2xl font-bold hover:opacity-90 transition-opacity pl-4"
+            className="text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-300"
           >
             Granthalaya
           </Link>
-          {/* Desktop Links (aligned to the rightmost side) */}
-          <div className="hidden md:flex items-center space-x-6 pr-4">
+
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center space-x-6">
             <NavLinks />
             <LogoutButton />
           </div>
-          {/* Mobile Menu Button */}
+
+          {/* Mobile Menu */}
           <Sheet>
             <SheetTrigger asChild>
               <Button
                 variant="outline"
                 size="icon"
-                className="md:hidden border-0 hover:bg-primary-light transition-all"
+                className="md:hidden border-none hover:bg-teal-400/20 transition-all"
               >
-                <Menu className="h-6 w-6 text-primary-foreground" />
+                <Menu className="h-6 w-6 text-teal-400" />
               </Button>
             </SheetTrigger>
-            {/* Mobile Menu Content */}
             <SheetContent
               side="right"
-              className="bg-primary-foreground text-primary p-6"
+              className="bg-gray-900 text-gray-100 p-6"
             >
               <nav className="flex flex-col space-y-6 mt-4">
-                <span className="text-lg font-semibold mb-4 text-center">
+                <span className="text-lg font-semibold mb-4 text-center text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-300">
                   Admin Panel
                 </span>
                 <NavLinks />
@@ -53,7 +54,11 @@ export default function AdminLayout({
           </Sheet>
         </div>
       </nav>
-      <main className="flex-1 overflow-auto p-8 bg-background">{children}</main>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto p-8 mt-20 bg-transparent">
+        {children}
+      </main>
     </div>
   );
 }
@@ -63,31 +68,31 @@ function NavLinks() {
     <>
       <Link
         href="/admin/books"
-        className="hover:underline transition-colors hover:text-primary-accent"
+        className="text-sm font-medium text-gray-300 hover:text-teal-400 transition-all"
       >
         Books
       </Link>
       <Link
         href="/admin/requests"
-        className="hover:underline transition-colors hover:text-primary-accent"
+        className="text-sm font-medium text-gray-300 hover:text-teal-400 transition-all"
       >
         Requests
       </Link>
       <Link
         href="/admin/transactions"
-        className="hover:underline transition-colors hover:text-primary-accent"
+        className="text-sm font-medium text-gray-300 hover:text-teal-400 transition-all"
       >
         Transactions
       </Link>
       <Link
         href="/admin/members"
-        className="hover:underline transition-colors hover:text-primary-accent"
+        className="text-sm font-medium text-gray-300 hover:text-teal-400 transition-all"
       >
         Members
       </Link>
       <Link
         href="/admin/return-book"
-        className="hover:underline transition-colors hover:text-primary-accent"
+        className="text-sm font-medium text-gray-300 hover:text-teal-400 transition-all"
       >
         Return Book
       </Link>

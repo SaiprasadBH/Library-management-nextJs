@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, PencilIcon } from "lucide-react";
 import { DeleteButton } from "@/components/ui/customButtons";
 import Link from "next/link";
 
@@ -41,63 +41,92 @@ export default async function MembersPage({
   const members = paginatedMembers.items;
 
   return (
-    <>
-      <div className="w-full flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-serif lg:text-4xl">Member Management</h1>
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-300">
+          Member Management
+        </h1>
         <Link
           href="/admin/members/create"
-          className="flex h-10 items-center rounded-lg bg-primary px-4 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          className="flex h-10 items-center rounded-lg bg-gradient-to-r from-teal-400 to-cyan-300 hover:from-teal-500 hover:to-cyan-400 px-4 text-sm font-medium text-gray-900 transition-all duration-300 transform hover:scale-105"
         >
-          <span className="hidden md:block mr-2">Add Member</span>
+          <span className="hidden sm:block mr-2">Add Member</span>
           <PlusIcon className="h-5 w-5" />
         </Link>
       </div>
-      <div className="mb-6">
-        <Search placeholder="Search for a member" />
-      </div>
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Age</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Address</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {members.map((member) => (
-              <TableRow key={member.id}>
-                <TableCell>{member.name}</TableCell>
-                <TableCell>{member.age}</TableCell>
-                <TableCell>{member.email}</TableCell>
-                <TableCell>{member.address}</TableCell>
-                <TableCell>{member.role}</TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <DeleteButton
-                      type="member"
-                      id={member.id}
-                      name={member.name}
-                    ></DeleteButton>
-                  </div>
-                </TableCell>
+
+      <Search placeholder="Search for a member" />
+
+      <div className="bg-gray-800/50 rounded-lg shadow-xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-gray-700">
+                <TableHead className="text-teal-400">Name</TableHead>
+                <TableHead className="text-teal-400">Age</TableHead>
+                <TableHead className="text-teal-400">Email</TableHead>
+                <TableHead className="text-teal-400">Address</TableHead>
+                <TableHead className="text-teal-400">Role</TableHead>
+                <TableHead className="text-teal-400">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {members.map((member) => (
+                <TableRow
+                  key={member.id}
+                  className="border-b border-gray-700 hover:bg-gray-700/50 transition-colors"
+                >
+                  <TableCell>{member.name}</TableCell>
+                  <TableCell>{member.age}</TableCell>
+                  <TableCell>{member.email}</TableCell>
+                  <TableCell>{member.address}</TableCell>
+                  <TableCell>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        member.role === "admin"
+                          ? "bg-purple-500 text-purple-900"
+                          : "bg-blue-500 text-blue-900"
+                      }`}
+                    >
+                      {member.role}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Link href={`/admin/members/${member.id}/edit`}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="bg-gray-700 text-teal-400 hover:bg-gray-600 border-teal-500"
+                        >
+                          <PencilIcon className="h-4 w-4 mr-2" />
+                          Edit
+                        </Button>
+                      </Link>
+                      <DeleteButton
+                        type="member"
+                        id={member.id}
+                        name={member.name}
+                      />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
+
       {members.length === 0 && (
-        <p className="text-center mt-4">No members found</p>
+        <p className="text-center mt-4 text-gray-400">No members found</p>
       )}
+
       <div className="flex justify-center mt-8">
         <PaginationControl
           currentPage={currentPage}
           options={paginationOptions}
         />
       </div>
-    </>
+    </div>
   );
 }
