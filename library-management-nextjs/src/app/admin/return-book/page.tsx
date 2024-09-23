@@ -28,7 +28,7 @@ export default async function BookReturnManagementPage({
   const transactionRepo = new TransactionRepository(drizzleAdapter);
   let currentPage = Number(searchParams?.page) || 1;
   const query = searchParams?.query || "";
-  const limit = 5;
+  const limit = 8;
 
   const listParameters: IPageRequest = {
     search: query,
@@ -48,7 +48,6 @@ export default async function BookReturnManagementPage({
         <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-300">
           Book Return Management
         </h1>
-        <Search placeholder="Search borrowed books" />
       </div>
 
       <div className="bg-gray-800/50 rounded-lg shadow-xl overflow-hidden">

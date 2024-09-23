@@ -6,6 +6,7 @@ import {
   CheckCircle,
   Edit,
   Lectern,
+  PencilIcon,
   Trash2,
   TrashIcon,
   XCircle,
@@ -21,6 +22,7 @@ import {
   deleteTransaction,
   rejectRequest,
   returnRequest,
+  switchUserRoles,
 } from "@/lib/actions";
 
 import { AlertDialogFooter, AlertDialogHeader } from "./alert-dialog";
@@ -263,5 +265,41 @@ export async function ReturnButton({
         Return
       </Button>
     </form>
+  );
+}
+
+export function SwitchRoleButton({ id, role }: { id: number; role: string }) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function handleSwitchRole() {
+    setIsLoading(true);
+    const state = await switchUserRoles(id, role);
+    setIsLoading(false);
+
+    if (state.success) {
+      toast({
+        title: "Success",
+        description: state.success,
+        className: "bg-teal-400 text-gray-900",
+      });
+    } else if (state.error || !state.success) {
+      toast({
+        title: "Error",
+        description: state.error,
+        variant: "destructive",
+      });
+    }
+  }
+
+  return (
+    <Button
+      onClick={handleSwitchRole}
+      disabled={isLoading}
+      className="bg-gradient-to-r from-teal-400 to-cyan-300 hover:from-teal-500 hover:to-cyan-400 text-gray-900 font-medium transition-all duration-300"
+    >
+      {isLoading
+        ? "Switching..."
+        : `Switch to ${role === "admin" ? "User" : "Admin"}`}
+    </Button>
   );
 }

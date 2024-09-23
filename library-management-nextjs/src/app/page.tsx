@@ -33,7 +33,7 @@ export default function Component() {
         >
           Granthalaya
         </Link>
-        <nav className="flex gap-6">
+        <nav className="flex items-center gap-6">
           <Link
             href="/login"
             className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
@@ -111,8 +111,8 @@ export default function Component() {
                 {[
                   {
                     icon: Book,
-                    title: "Smart Inventory",
-                    description: "AI-powered book tracking and organization.",
+                    title: "Inventory Management",
+                    description: "Efficient book tracking and organization.",
                   },
                   {
                     icon: Users,

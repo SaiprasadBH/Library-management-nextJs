@@ -19,6 +19,7 @@ import {
   DeleteButton,
   EditButton,
 } from "@/components/ui/customButtons";
+import { SortableColumn } from "@/components/ui/sortable-table-header";
 
 export default async function AdminHomePage({
   searchParams,
@@ -26,16 +27,22 @@ export default async function AdminHomePage({
   searchParams?: {
     query?: string;
     page?: string;
+    sortField: string;
+    sortDirection: string;
   };
 }) {
-  let currentPage = Number(searchParams?.page) || 1;
+  const currentPage = Number(searchParams?.page) || 1;
   const query = searchParams?.query || "";
-  const limit = 5;
+  const sortField = searchParams?.sortField || "title";
+  const sortDirection = searchParams?.sortDirection || "asc";
+  const limit = 8;
 
   const listParameters: IPageRequest = {
     search: query,
     offset: (currentPage - 1) * limit,
     limit: limit,
+    sortField,
+    sortDirection,
   };
 
   const paginatedBooks: IPagedResponse<IBook> = await fetchBooks(
@@ -43,7 +50,6 @@ export default async function AdminHomePage({
   );
   const paginationOptions = paginatedBooks.pagination;
   const books = paginatedBooks.items;
-
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -65,12 +71,13 @@ export default async function AdminHomePage({
           <Table>
             <TableHeader>
               <TableRow className="border-b border-gray-700">
-                <TableHead className="text-teal-400">Title</TableHead>
-                <TableHead className="text-teal-400">Author</TableHead>
-                <TableHead className="text-teal-400">Publisher</TableHead>
-                <TableHead className="text-teal-400">Genre</TableHead>
-                <TableHead className="text-teal-400">ISBN</TableHead>
-                <TableHead className="text-teal-400">Pages</TableHead>
+                <SortableColumn label="Title" field="title" />
+                <SortableColumn label="Author" field="author" />
+                <SortableColumn label="Publisher" field="publisher" />
+                <SortableColumn label="Genre" field="genre" />
+                <SortableColumn label="ISBN" field="isbnNo" />
+                <SortableColumn label="Pages" field="numOfPages" />
+
                 <TableHead className="text-teal-400">Copies</TableHead>
                 <TableHead className="text-teal-400">Actions</TableHead>
               </TableRow>

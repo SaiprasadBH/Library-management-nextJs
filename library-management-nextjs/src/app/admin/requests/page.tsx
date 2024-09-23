@@ -23,7 +23,7 @@ export default async function RequestManagementPage({
 }) {
   let currentPage = Number(searchParams?.page) || 1;
   const query = searchParams?.query || "";
-  const limit = 5;
+  const limit = 8;
 
   const listParameters: IPageRequest = {
     search: query,
