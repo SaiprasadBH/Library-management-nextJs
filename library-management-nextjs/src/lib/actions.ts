@@ -30,6 +30,7 @@ import { error } from "console";
 import { revalidatePath } from "next/cache";
 import { TransactionRepository } from "./repositories/transaction.repository";
 import { MySql2Database } from "drizzle-orm/mysql2";
+import { use } from "react";
 
 const memberRepo = new MemberRepository(drizzleAdapter);
 const bookRepo = new BookRepository(drizzleAdapter);
@@ -350,8 +351,6 @@ export async function createBook(prevState: any, formData: FormData) {
     if (!response) {
       throw new Error("Failed to create book");
     }
-
-    return { success: true };
   } catch (error) {
     if (error instanceof ZodError) {
       return { error: error.errors[0].message || "Invalid input" };
@@ -360,6 +359,8 @@ export async function createBook(prevState: any, formData: FormData) {
     }
 
     return { error: "An unexpected error occurred" };
+  } finally {
+    redirect("/admin/books");
   }
 }
 
@@ -494,5 +495,33 @@ export async function returnRequest(id: number) {
     return {
       error: (error as Error).message,
     };
+  }
+}
+export async function switchUserRoles(id: number, role: string) {
+  try {
+    const user = await memberRepo.getById(id);
+    let updatedUser: IMemberBase | undefined;
+    const updatedRole = role === "admin" ? "user" : "admin";
+    if (!user) {
+      return { error: "Failed to fetch user while changing role" };
+    } else {
+      updatedUser = {
+        name: user?.name,
+        address: user.address,
+        email: user.email,
+        age: user.age,
+        password: user.password,
+        role: updatedRole,
+      };
+    }
+    const result = await memberRepo.update(id, updatedUser);
+    if (!result) {
+      return { error: "Failed to update the role" };
+    }
+    return { success: `role switched for user ${result.name}` };
+  } catch (error) {
+    return { error: "Failed to update the role" };
+  } finally {
+    revalidatePath("/admin/members/");
   }
 }

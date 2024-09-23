@@ -10,12 +10,12 @@ export const MemberBaseSchema = z.object({
     .min(5, { message: "Member must be atleast 5 years old." })
     .max(100, { message: "Member cannot live that long." }),
   email: z.string(),
-  address: z.string().min(5, {
-    message: "Address is too short, must be of minimum 5 characters long.",
+  address: z.string().min(2, {
+    message: "Address is too short, must be of minimum 2 characters long.",
   }),
   password: z
     .string()
-    .min(8)
+    .min(8, { message: "password must contain atleast 8 character" })
     .refine(
       (value) => {
         return /[A-Z]/.test(value);

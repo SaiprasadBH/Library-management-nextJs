@@ -18,7 +18,7 @@ import { UploadButton } from "@/utils/uploadting";
 import { motion } from "framer-motion";
 
 export default function BookCreateForm() {
-  const initialState = { success: false, error: undefined };
+  const initialState = { success: false, error: "" };
   const [createState, createFormAction] = useActionState(
     createBook,
     initialState
@@ -212,7 +212,6 @@ export default function BookCreateForm() {
               type="submit"
               className="w-full sm:w-auto sm:min-w-[200px] bg-gradient-to-r from-teal-400 to-cyan-300 hover:from-teal-500 hover:to-cyan-400 text-gray-900 font-bold transition-all duration-300 transform hover:scale-105 rounded-lg"
             >
-              <PlusIcon className="mr-2 h-5 w-5" />
               Create Book
             </Button>
             {createState?.error && (
@@ -222,15 +221,6 @@ export default function BookCreateForm() {
                 className="text-sm text-red-500 text-center w-full bg-red-500/10 p-2 rounded-lg"
               >
                 {createState.error}
-              </motion.p>
-            )}
-            {createState?.success && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-sm text-teal-400 text-center w-full bg-teal-500/10 p-2 rounded-lg"
-              >
-                Book created successfully!
               </motion.p>
             )}
           </CardFooter>

@@ -28,7 +28,7 @@ export default async function Component({
 }) {
   const currentPage = Number(searchParams?.page) || 1;
   const query = searchParams?.query || "";
-  const limit = 5;
+  const limit = 8;
 
   const memberRepo = new MemberRepository(drizzleAdapter);
   const bookRepo = new BookRepository(drizzleAdapter);
