@@ -96,6 +96,12 @@ function NavLinks() {
       >
         Return Book
       </Link>
+      <Link
+        href="/admin/dues"
+        className="text-sm font-medium text-gray-300 hover:text-teal-400 transition-all"
+      >
+        Dues
+      </Link>
     </>
   );
 }

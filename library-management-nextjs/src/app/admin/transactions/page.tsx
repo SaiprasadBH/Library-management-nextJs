@@ -30,9 +30,6 @@ export default async function Component({
   const query = searchParams?.query || "";
   const limit = 8;
 
-  const memberRepo = new MemberRepository(drizzleAdapter);
-  const bookRepo = new BookRepository(drizzleAdapter);
-
   const listParameters: IPageRequest = {
     search: query,
     offset: (currentPage - 1) * limit,
