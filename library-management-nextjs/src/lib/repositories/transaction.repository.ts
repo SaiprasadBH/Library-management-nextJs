@@ -68,15 +68,15 @@ export class TransactionRepository
     id: number,
     bookStatus: "pending" | "issued" | "rejected" | "returned"
   ): Promise<ITransaction | undefined> {
-    // Fetch the transaction by ID to ensure it exists
     const transaction = await this.getById(id);
     if (!transaction) {
       throw new Error("Transaction not found.");
     }
 
     const db = await this.dbConnFactory.getConnection();
+    let updatedTransaction: ITransaction | undefined;
 
-    // If the status is "rejected", fetch the book and update the available copies
+    // If the status is "rejected" or "returned", update the book's available copies
     if (bookStatus === "rejected" || bookStatus === "returned") {
       const book = await this.bookRepo.getById(Number(transaction.bookId));
       if (!book) {
@@ -88,16 +88,21 @@ export class TransactionRepository
         availableNumOfCopies: book.availableNumOfCopies + 1,
       };
 
-      // Update the book's available copies in the database
       await this.bookRepo.update(book.id, updatedBook);
     }
 
+    // Update the bookStatus and possibly the dateOfIssue if status is 'issued'
     try {
-      // Update the transaction's bookStatus
-      const updatedTransaction = await db.transaction(async (tx) => {
+      updatedTransaction = await db.transaction(async (tx) => {
+        const updateData: Partial<ITransaction> = { bookStatus };
+
+        if (bookStatus === "issued") {
+          updateData.dateOfIssue = new Date().toISOString().split("T")[0];
+        }
+
         await tx
           .update(transactions)
-          .set({ bookStatus })
+          .set(updateData)
           .where(eq(transactions.id, id));
 
         return transaction;
@@ -365,5 +370,59 @@ export class TransactionRepository
     } catch (error) {
       throw new Error((error as Error).message);
     }
+  }
+  async listOverdueTransactions(params: IPageRequest) {
+    const db = await this.dbConnFactory.getConnection();
+    const fifteenDaysAgo = new Date();
+    fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+    const overdueDate = fifteenDaysAgo.toISOString().split("T")[0];
+
+    let searchWhereClause;
+
+    if (params.search) {
+      const search = `%${params.search.toLowerCase()}%`;
+      searchWhereClause = sql`${transactions.bookStatus} = 'issued'
+        AND ${transactions.dateOfIssue} < ${overdueDate}
+        AND (
+          ${books.title} ILIKE ${search}
+          OR ${members.name} ILIKE ${search}
+          OR ${members.email} ILIKE ${search}
+          OR ${books.isbnNo} ILIKE ${search}
+        )`;
+    } else {
+      searchWhereClause = sql`${transactions.bookStatus} = 'issued'
+        AND ${transactions.dateOfIssue} < ${overdueDate}`;
+    }
+
+    const items = await db
+      .select({
+        id: transactions.id,
+        memberName: members.name,
+        memberEmail: members.email,
+        bookTitle: books.title,
+        dateOfIssue: transactions.dateOfIssue,
+        bookStatus: transactions.bookStatus,
+        isbn: books.isbnNo,
+      })
+      .from(transactions)
+      .leftJoin(members, sql`${transactions.memberId} = ${members.id}`)
+      .leftJoin(books, sql`${transactions.bookId} = ${books.id}`)
+      .where(searchWhereClause)
+      .offset(params.offset)
+      .limit(params.limit);
+
+    const [{ count: total }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(transactions)
+      .where(searchWhereClause);
+
+    return {
+      items,
+      pagination: {
+        offset: params.offset,
+        limit: params.limit,
+        total,
+      },
+    };
   }
 }

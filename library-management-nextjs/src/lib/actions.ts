@@ -204,6 +204,18 @@ export async function fetchMemberSpecificBookRequestsWithStatus(
   }
 }
 
+export async function fetchDueTransactions(params: IPageRequest) {
+  try {
+    const result = await transactionRepo.listOverdueTransactions(params);
+    if (!result) {
+      throw new Error("No due transactions returned from repository");
+    }
+    return result;
+  } catch (error) {
+    console.error("Error in fetching due transactions", error);
+  }
+}
+
 export async function updateBook(
   id: number,
   prevState: any,
