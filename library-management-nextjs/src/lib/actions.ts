@@ -91,6 +91,7 @@ export async function authenticate(
   }
 }
 
+
 export async function getOrganizationUri() {
   try {
     const response = await fetch("https://api.calendly.com/users/me", {
@@ -181,7 +182,6 @@ export async function getScheduledEventsWithDetails(
 
         // Fetch invitee details for each event
         const invitees = await getInviteeDetails(eventUUID);
-        console.log("Invitees:", invitees);
 
         // Fetch organizer details from event memberships
         const organizers = event.event_memberships.map((membership: any) => ({
