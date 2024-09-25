@@ -1,0 +1,56 @@
+{
+  "LocaleSwitcher": {
+    "en": "English",
+    "kn": "ಕನ್ನಡ",
+    "label": "Language"
+  },
+  "header": {
+    "title": "Granthalaya",
+    "login": "Login",
+    "register": "Register"
+  },
+  "main": {
+    "hero": {
+      "title": "Enhance Your Knowledge with Granthalaya",
+      "description": "Experience the future of library management. Streamline operations, enhance user experiences, and unlock the full potential of your collection.",
+      "getStarted": "Get Started",
+      "login": "Login"
+    },
+    "features": {
+      "title": "Powerful Features",
+      "description": "Discover the tools that will revolutionize your library management experience.",
+      "feature1": {
+        "title": "Inventory Management",
+        "description": "Efficient book tracking and organization."
+      },
+      "feature2": {
+        "title": "User Management",
+        "description": "Seamless borrower profiles and history."
+      },
+      "feature3": {
+        "title": "Analytics Dashboard",
+        "description": "Real-time insights and trend analysis."
+      }
+    }
+  },
+  "footer": {
+    "description": "Empowering libraries, one book at a time.",
+    "quickLinks": "Quick Links",
+    "legal": "Legal",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "copyright": "© 2024 Granthalaya. All rights reserved."
+  },
+
+  "login": {
+    "welcomeBack": "Welcome Back",
+    "enterCredentials": "Enter your credentials to access your account",
+    "email": "Email",
+    "password": "Password",
+    "login": "Login",
+    "loggingIn": "Logging in...",
+    "orContinue": "Or continue with",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up"
+  }
+}

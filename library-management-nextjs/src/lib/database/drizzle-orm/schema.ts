@@ -66,3 +66,20 @@ export const transactions = pgTable("transactions", {
   bookStatus: statusEnum("bookStatus").notNull(),
   dateOfIssue: varchar("dateOfIssue", { length: 15 }),
 });
+
+export const professors = pgTable(
+  "professors",
+  {
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 35 }).notNull(),
+    email: varchar("email", { length: 255 }).notNull(),
+    department: varchar("department", { length: 50 }),
+    bio: varchar("bio", { length: 255 }),
+    calendlyLink: varchar("calendlyLink", { length: 255 }).notNull(),
+  },
+  (professors) => {
+    return {
+      uniqueEmailIdx: uniqueIndex("unique_prof_email_idx").on(professors.email),
+    };
+  }
+);

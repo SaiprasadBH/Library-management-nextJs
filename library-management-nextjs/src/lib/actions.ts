@@ -31,12 +31,32 @@ import { revalidatePath } from "next/cache";
 import { TransactionRepository } from "./repositories/transaction.repository";
 import { MySql2Database } from "drizzle-orm/mysql2";
 import { use } from "react";
+import { ProfessorRepository } from "./repositories/professor.repository";
+import {
+  IProfessor,
+  IProfessorBase,
+  ProfessorBaseSchema,
+} from "./database/zod/professor.schema";
+import { AppEnvs } from "./core/read-env";
+
+interface Invitee {
+  email: string;
+  name: string;
+}
+
+interface Event {
+  uri: string;
+  name: string;
+  start_time: string;
+  end_time: string;
+  invitees: Invitee[]; // Array of invitees
+}
 
 const memberRepo = new MemberRepository(drizzleAdapter);
 const bookRepo = new BookRepository(drizzleAdapter);
 const connection = await drizzleAdapter.getConnection();
 const transactionRepo = new TransactionRepository(drizzleAdapter);
-
+const professorRepo = new ProfessorRepository(drizzleAdapter);
 export async function fetchAllBooks() {
   const dbConnection = await drizzleAdapter.getConnection();
   const booksArray = dbConnection.select().from(books);
@@ -71,6 +91,123 @@ export async function authenticate(
   }
 }
 
+export async function getUserUri() {
+  try {
+    const response = await fetch("https://api.calendly.com/users/me", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${AppEnvs.NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching user info: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.resource.uri;
+  } catch (error) {
+    console.error("Error fetching user URI", error);
+    throw error;
+  }
+}
+
+export async function getScheduledEventsWithDetails() {
+  const userUri = await getUserUri();
+
+  try {
+    const response = await fetch(
+      `https://api.calendly.com/scheduled_events?user=${encodeURIComponent(
+        userUri
+      )}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${AppEnvs.NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log("Error fetching scheduled events:", errorText);
+      throw new Error(`Error fetching Calendly events: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const events = data.collection;
+
+    const eventsWithDetails = await Promise.all(
+      events.map(async (event: any) => {
+        // Get Google Meet link (if available)
+        const meetLink = event.location?.join_url || "No Meet link";
+
+        // Extract event UUID from the event URI
+        const eventUUID = event.uri.split("/").pop();
+
+        // Fetch invitee details for each event
+        const invitees = await getInviteeDetails(eventUUID);
+
+        // Fetch organizer details from event memberships
+        const organizers = event.event_memberships.map((membership: any) => ({
+          name: membership.user_name,
+          email: membership.user_email,
+        }));
+
+        return {
+          event: event.name,
+          start_time: event.start_time,
+          end_time: event.end_time,
+          meetLink: meetLink,
+          organizers, // Organizers info
+          invitees: invitees.map((invitee: any) => ({
+            name: invitee.name,
+            email: invitee.email,
+          })),
+        };
+      })
+    );
+
+    console.log(
+      "Events with Google Meet links, invitees, and organizers:",
+      eventsWithDetails
+    );
+    return eventsWithDetails;
+  } catch (error) {
+    console.error("Error fetching scheduled events and details", error);
+    throw error;
+  }
+}
+
+// Helper function to get invitee details
+export async function getInviteeDetails(event_uuid: string) {
+  try {
+    const response = await fetch(
+      `https://api.calendly.com/scheduled_events/${event_uuid}/invitees`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${AppEnvs.NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log("Error fetching invitees:", errorText);
+      throw new Error(`Error fetching invitees: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.collection; // List of invitees
+  } catch (error) {
+    console.error("Error fetching invitee details", error);
+    throw error;
+  }
+}
 export async function registerUser(prevState: any, formData: FormData) {
   const user: IMemberBase = {
     name: formData.get("name") as string,
@@ -204,6 +341,19 @@ export async function fetchMemberSpecificBookRequestsWithStatus(
   }
 }
 
+export async function fetchProfessorsList(params: IPageRequest) {
+  try {
+    const result = await professorRepo.list(params);
+    if (!result) {
+      throw new Error("No member returned from repository");
+    }
+    return result;
+  } catch (err) {
+    console.error("Error in fetching member", error);
+    throw new Error("Falid to fetch members");
+  }
+}
+
 export async function fetchDueTransactions(params: IPageRequest) {
   try {
     const result = await transactionRepo.listOverdueTransactions(params);
@@ -213,6 +363,15 @@ export async function fetchDueTransactions(params: IPageRequest) {
     return result;
   } catch (error) {
     console.error("Error in fetching due transactions", error);
+  }
+}
+
+export async function fetchAllProfessors() {
+  try {
+    const professors = await professorRepo.getAll();
+    return professors;
+  } catch (error) {
+    console.error("error occured while fetching all professors:", error);
   }
 }
 
@@ -397,6 +556,43 @@ export async function createMember(prevState: any, formData: FormData) {
       return { error: error.errors[0].message || "Invalid input" };
     } else if ((error as Error).message) {
       return { error: `${(error as Error).message}` };
+    }
+
+    return { error: "An unexpected error occurred" };
+  }
+}
+
+export async function createProfessor(prevState: any, formData: FormData) {
+  try {
+    const professorData = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      department: formData.get("department"),
+      bio: formData.get("bio"),
+      calendlyLink: formData.get("calendlyLink"),
+    };
+
+    // Validate the input data
+    const validatedData = ProfessorBaseSchema.parse(professorData);
+
+    const professor: IProfessorBase = {
+      name: validatedData.name,
+      email: validatedData.email,
+      department: validatedData.department,
+      bio: validatedData.bio,
+      calendlyLink: validatedData.calendlyLink,
+    };
+
+    const response = await professorRepo.create(professor);
+    if (!response) {
+      throw new Error("Failed to create professor");
+    }
+    return { success: true };
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return { error: error.errors[0].message || "Invalid input" };
+    } else if (error instanceof Error) {
+      return { error: error.message };
     }
 
     return { error: "An unexpected error occurred" };

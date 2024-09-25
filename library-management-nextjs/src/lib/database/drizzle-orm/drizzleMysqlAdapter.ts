@@ -1,6 +1,6 @@
 import { sql } from "@vercel/postgres"; // `@vercel/postgres` package for connecting to PostgreSQL
 import { AppEnvs } from "../../core/read-env";
-import { members, books, transactions } from "./schema";
+import { members, books, transactions, professors } from "./schema";
 import "@/lib/database/drizzle-orm/envConfig";
 import * as schema from "@/lib/database/drizzle-orm/schema";
 import { VercelPgDatabase } from "drizzle-orm/vercel-postgres";
@@ -19,4 +19,4 @@ export class DrizzleAdapter implements IDrizzleAdapter {
 }
 
 const drizzleAdapter = new DrizzleAdapter();
-export { drizzleAdapter, members, books, transactions };
+export { drizzleAdapter, members, books, transactions, professors };

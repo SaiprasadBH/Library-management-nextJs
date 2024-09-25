@@ -3,22 +3,25 @@ import { configDotenv } from "dotenv";
 
 configDotenv();
 interface AppEnv {
-  DATABASE_URL: string;
   NEXTAUTH_SECRET: string;
+  NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN: string;
 }
 
 // Access and validate environment variables
 const getAppEnvs = (): AppEnv => {
-  if (!process.env.DATABASE_URL) {
-    throw new Error("DATABASE_URL is not defined in the environment variables");
-  }
   if (!process.env.NEXTAUTH_SECRET) {
     throw new Error("NEXTAUTH_SECRET is not defined in environment variable");
   }
+  if (!process.env.NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN) {
+    throw new Error(
+      "NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN is not defined in the environment variables"
+    );
+  }
 
   return {
-    DATABASE_URL: process.env.DATABASE_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN:
+      process.env.NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN,
   };
 };
 
