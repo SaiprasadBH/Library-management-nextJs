@@ -91,6 +91,29 @@ export async function authenticate(
   }
 }
 
+
+export async function getOrganizationUri() {
+  try {
+    const response = await fetch("https://api.calendly.com/users/me", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${AppEnvs.NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching user info: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.resource.current_organization;
+  } catch (error) {
+    console.error("Error fetching user URI", error);
+    throw error;
+  }
+}
+
 export async function getUserUri() {
   try {
     const response = await fetch("https://api.calendly.com/users/me", {
@@ -113,22 +136,32 @@ export async function getUserUri() {
   }
 }
 
-export async function getScheduledEventsWithDetails() {
+export async function getScheduledEventsWithDetails(
+  organization?: "organization"
+) {
   const userUri = await getUserUri();
+  const organizationUri = await getOrganizationUri();
+  const session = await auth();
+  const userEmail = session?.user.email;
+  let fetchUrl;
+  if (organization) {
+    fetchUrl = `https://api.calendly.com/scheduled_events?organization=${encodeURIComponent(
+      organizationUri
+    )}`;
+  } else {
+    fetchUrl = `https://api.calendly.com/scheduled_events?organization=${encodeURIComponent(
+      organizationUri
+    )}&&invitee_email=${userEmail}`;
+  }
 
   try {
-    const response = await fetch(
-      `https://api.calendly.com/scheduled_events?user=${encodeURIComponent(
-        userUri
-      )}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${AppEnvs.NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await fetch(fetchUrl, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${AppEnvs.NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+    });
 
     if (!response.ok) {
       const errorText = await response.text();

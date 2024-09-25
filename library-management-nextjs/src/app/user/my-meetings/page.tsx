@@ -33,15 +33,15 @@ export default async function MeetingDetailsPage() {
 
   try {
     const allEvents: MeetingEvent[] = await getScheduledEventsWithDetails();
-    const userEvents = allEvents.filter(
-      (event) =>
-        event.invitees.some((invitee: Person) => invitee.email === userEmail) ||
-        event.organizers.some(
-          (organizer: Person) => organizer.email === userEmail
-        )
-    );
+    // const userEvents = allEvents.filter(
+    //   (event) =>
+    //     event.invitees.some((invitee: Person) => invitee.email === userEmail) ||
+    //     event.organizers.some(
+    //       (organizer: Person) => organizer.email === userEmail
+    //     )
+    // );
 
-    return <MeetingDetailsList events={userEvents} />;
+    return <MeetingDetailsList events={allEvents} />;
   } catch (error) {
     console.error("Error fetching meeting details:", error);
     return (
