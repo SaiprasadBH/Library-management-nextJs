@@ -97,6 +97,13 @@ function NavLinks() {
       >
         Professors
       </Link>
+
+      <Link
+        href="/admin/meetings"
+        className="text-sm font-medium text-gray-300 hover:text-teal-400 transition-all"
+      >
+        Meetings
+      </Link>
       <Link
         href="/admin/return-book"
         className="text-sm font-medium text-gray-300 hover:text-teal-400 transition-all"
