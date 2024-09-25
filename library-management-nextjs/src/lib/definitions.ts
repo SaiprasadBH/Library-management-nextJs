@@ -4,6 +4,7 @@ import type {
   ITransaction,
   ITransactionBase,
 } from "./models/transaction.model";
+import type { IProfessor, IProfessorBase } from "./models/professor.model";
 export type {
   IBook,
   IBookBase,
@@ -11,4 +12,6 @@ export type {
   IMemberBase,
   ITransaction,
   ITransactionBase,
+  IProfessor,
+  IProfessorBase,
 };

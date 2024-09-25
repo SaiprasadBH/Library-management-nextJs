@@ -45,7 +45,7 @@ export const DeleteButton = ({
 }: {
   id: number;
   name: string;
-  type: "book" | "member" | "transaction";
+  type: "book" | "member" | "transaction" | "professor";
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 

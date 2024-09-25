@@ -82,6 +82,19 @@ function NavLinks() {
       >
         My Profile
       </Link>
+      <Link
+        href="/user/appointments"
+        className="text-sm font-medium text-gray-300 hover:text-teal-400 transition-all"
+      >
+        Book appointment
+      </Link>
+
+      <Link
+        href="/user/my-meetings"
+        className="text-sm font-medium text-gray-300 hover:text-teal-400 transition-all"
+      >
+        My meetings
+      </Link>
     </>
   );
 }
