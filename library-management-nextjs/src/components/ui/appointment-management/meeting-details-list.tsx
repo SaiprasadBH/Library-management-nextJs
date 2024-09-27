@@ -4,11 +4,25 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Users, Video, UserCircle } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Users,
+  Video,
+  UserCircle,
+  RefreshCw,
+  X,
+} from "lucide-react";
+import CalendlyModal from "@/components/ui/appointment-management/calendly-reschedule";
+import { IMember } from "@/lib/definitions";
+import CancellationModal from "./calendly-cancellation";
 
 interface Person {
   name: string;
   email: string;
+  cancel_url: string;
+  reschedule_url: string;
+  status: string;
 }
 
 interface MeetingEvent {
@@ -18,6 +32,7 @@ interface MeetingEvent {
   meetLink: string;
   organizers: Person[];
   invitees: Person[];
+  status: string;
 }
 
 export default function MeetingDetailsList({
@@ -26,6 +41,10 @@ export default function MeetingDetailsList({
   events: MeetingEvent[];
 }) {
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
+  const [rescheduleEvent, setRescheduleEvent] = useState<MeetingEvent | null>(
+    null
+  );
+  const [cancelEvent, setCancelEvent] = useState<MeetingEvent | null>(null);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -46,6 +65,25 @@ export default function MeetingDetailsList({
     const durationMs = endTime.getTime() - startTime.getTime();
     const durationMinutes = Math.round(durationMs / 60000);
     return `${durationMinutes} minutes`;
+  };
+
+  const handleReschedule = (event: MeetingEvent) => {
+    setRescheduleEvent(event);
+  };
+
+  const handleCancel = async (event: MeetingEvent) => {
+    setCancelEvent(event);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "active":
+        return "bg-green-500";
+      case "canceled":
+        return "bg-red-500";
+      default:
+        return "bg-yellow-500";
+    }
   };
 
   return (
@@ -72,8 +110,15 @@ export default function MeetingDetailsList({
             >
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-teal-500/20 overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-teal-500/10 to-cyan-500/10 p-6">
-                  <CardTitle className="text-2xl font-bold text-white">
-                    {event.event}
+                  <CardTitle className="text-2xl font-bold text-white flex justify-between items-center">
+                    <span>{event.event}</span>
+                    <span
+                      className={`text-sm px-2 py-1 rounded ${getStatusColor(
+                        event.status
+                      )}`}
+                    >
+                      {event.status}
+                    </span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
@@ -112,6 +157,24 @@ export default function MeetingDetailsList({
                       {event.invitees.length} Attendee
                       {event.invitees.length !== 1 ? "s" : ""}
                     </span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={() => handleReschedule(event)}
+                      className="bg-blue-500 hover:bg-blue-600 text-white"
+                      disabled={event.status.toLowerCase() !== "active"}
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Reschedule
+                    </Button>
+                    <Button
+                      onClick={() => handleCancel(event)}
+                      className="bg-red-500 hover:bg-red-600 text-white"
+                      disabled={event.status.toLowerCase() !== "active"}
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Cancel
+                    </Button>
                   </div>
                   {expandedEvent === event.event ? (
                     <div className="mt-4 space-y-4">
@@ -156,6 +219,20 @@ export default function MeetingDetailsList({
           ))
         )}
       </div>
+      {rescheduleEvent && (
+        <CalendlyModal
+          url={rescheduleEvent.invitees[0]?.reschedule_url || ""}
+          isOpen={!!rescheduleEvent}
+          onClose={() => setRescheduleEvent(null)}
+        />
+      )}
+      {cancelEvent && (
+        <CalendlyModal
+          url={cancelEvent.invitees[0]?.cancel_url || ""}
+          isOpen={!!cancelEvent}
+          onClose={() => setCancelEvent(null)}
+        />
+      )}
     </div>
   );
 }

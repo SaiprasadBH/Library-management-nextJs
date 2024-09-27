@@ -91,7 +91,6 @@ export async function authenticate(
   }
 }
 
-
 export async function getOrganizationUri() {
   try {
     const response = await fetch("https://api.calendly.com/users/me", {
@@ -135,7 +134,6 @@ export async function getUserUri() {
     throw error;
   }
 }
-
 export async function getScheduledEventsWithDetails(
   organization?: "organization"
 ) {
@@ -172,8 +170,17 @@ export async function getScheduledEventsWithDetails(
     const data = await response.json();
     const events = data.collection;
 
+    // Get the current date and time in UTC
+    const now = new Date();
+
+    // Filter out past events (those that have already ended)
+    const filteredEvents = events.filter((event: any) => {
+      const eventStartTime = new Date(event.start_time);
+      return eventStartTime >= now; // Only keep events starting now or in the future
+    });
+
     const eventsWithDetails = await Promise.all(
-      events.map(async (event: any) => {
+      filteredEvents.map(async (event: any) => {
         // Get Google Meet link (if available)
         const meetLink = event.location?.join_url || "No Meet link";
 
@@ -189,24 +196,28 @@ export async function getScheduledEventsWithDetails(
           email: membership.user_email,
         }));
 
+        // Extract relevant fields from invitees
+        const inviteeDetails = invitees.map((invitee: any) => ({
+          name: invitee.name,
+          email: invitee.email,
+          cancel_url: invitee.cancel_url,
+          reschedule_url: invitee.reschedule_url,
+          status: invitee.status, // Invitee status
+        }));
+
         return {
           event: event.name,
           start_time: event.start_time,
           end_time: event.end_time,
           meetLink: meetLink,
+          status: event.status, // Event status
           organizers, // Organizers info
-          invitees: invitees.map((invitee: any) => ({
-            name: invitee.name,
-            email: invitee.email,
-          })),
+          invitees: inviteeDetails, // Invitee info with cancellation and reschedule URLs
+          uuid: eventUUID,
         };
       })
     );
 
-    console.log(
-      "Events with Google Meet links, invitees, and organizers:",
-      eventsWithDetails
-    );
     return eventsWithDetails;
   } catch (error) {
     console.error("Error fetching scheduled events and details", error);
@@ -241,6 +252,40 @@ export async function getInviteeDetails(event_uuid: string) {
     throw error;
   }
 }
+
+// Function to cancel a scheduled event (meeting) via Calendly API
+export async function cancelScheduledEvent(
+  eventUUID: string,
+  cancelReason: string
+) {
+  try {
+    const response = await fetch(
+      `https://api.calendly.com/scheduled_events/${eventUUID}/cancellation`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${AppEnvs.NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          reason: cancelReason || "No reason provided",
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Error canceling the event:", errorText);
+      throw new Error(`Error canceling event: ${response.statusText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("Error canceling event", error);
+    throw error;
+  }
+}
+
 export async function registerUser(prevState: any, formData: FormData) {
   const user: IMemberBase = {
     name: formData.get("name") as string,
