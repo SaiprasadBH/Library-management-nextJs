@@ -85,15 +85,17 @@ export default async function ProfessorsPage({
                       {professor.bio}
                     </TableCell>
                     <TableCell>
-                      <a
-                        href={professor.calendlyLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-teal-400 hover:text-teal-300 flex items-center"
-                      >
-                        <ExternalLinkIcon className="h-4 w-4 mr-1" />
-                        <span className="hidden sm:inline">Calendly</span>
-                      </a>
+                      {professor.calendlyLink && (
+                        <a
+                          href={professor.calendlyLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-teal-400 hover:text-teal-300 flex items-center"
+                        >
+                          <ExternalLinkIcon className="h-4 w-4 mr-1" />
+                          <span className="hidden sm:inline">Calendly</span>
+                        </a>
+                      )}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2 justify-center">

@@ -5,6 +5,9 @@ import { auth } from "@/auth";
 interface Person {
   name: string;
   email: string;
+  cancel_url: string;
+  reschedule_url: string;
+  status: string;
 }
 
 interface MeetingEvent {
@@ -14,6 +17,7 @@ interface MeetingEvent {
   meetLink: string;
   organizers: Person[];
   invitees: Person[];
+  status: string;
 }
 
 export default async function MeetingDetailsPage() {
@@ -33,13 +37,6 @@ export default async function MeetingDetailsPage() {
 
   try {
     const allEvents: MeetingEvent[] = await getScheduledEventsWithDetails();
-    // const userEvents = allEvents.filter(
-    //   (event) =>
-    //     event.invitees.some((invitee: Person) => invitee.email === userEmail) ||
-    //     event.organizers.some(
-    //       (organizer: Person) => organizer.email === userEmail
-    //     )
-    // );
 
     return <MeetingDetailsList events={allEvents} />;
   } catch (error) {

@@ -60,10 +60,12 @@ export default async function ProfessorAppointment({
           </p>
           <p className="text-gray-400 mb-4">Bio: {professor.bio}</p>
         </div>
-        <CalendlyElement
-          url={professor.calendlyLink}
-          user={user}
-        ></CalendlyElement>
+        {professor.calendlyLink && (
+          <CalendlyElement
+            url={professor.calendlyLink}
+            user={user}
+          ></CalendlyElement>
+        )}
       </div>
     </div>
   );

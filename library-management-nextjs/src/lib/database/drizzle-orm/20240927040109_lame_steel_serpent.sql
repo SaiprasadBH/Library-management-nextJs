@@ -1,0 +1,1 @@
+ALTER TABLE "professors" ALTER COLUMN "calendlyLink" DROP NOT NULL;
