@@ -11,7 +11,8 @@ export const ProfessorBaseSchema = z.object({
   bio: z.string({ message: "Bio must be a string." }).optional(),
   calendlyLink: z
     .string({ message: "Calendly link must be a string." })
-    .url({ message: "Invalid URL format." }),
+    .url({ message: "Invalid URL format." })
+    .nullable(),
 });
 
 export const ProfessorSchema = ProfessorBaseSchema.extend({
