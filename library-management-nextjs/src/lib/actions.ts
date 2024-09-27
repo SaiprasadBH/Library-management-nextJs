@@ -401,6 +401,7 @@ export async function checkInvitationAndUpdateCalendlyLink(email: string) {
   }
 }
 
+
 export async function registerUser(prevState: any, formData: FormData) {
   const user: IMemberBase = {
     name: formData.get("name") as string,
