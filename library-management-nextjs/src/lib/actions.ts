@@ -11,6 +11,8 @@ import {
   ITransaction,
   ITransactionBase,
   IBookBase,
+  IProfessorBase,
+  IProfessor,
 } from "./definitions";
 import { IMember, MemberBaseSchema } from "./database/zod/member.schema";
 import { hashPassword } from "./hashing/passwordHashing";
@@ -32,11 +34,7 @@ import { TransactionRepository } from "./repositories/transaction.repository";
 import { MySql2Database } from "drizzle-orm/mysql2";
 import { use } from "react";
 import { ProfessorRepository } from "./repositories/professor.repository";
-import {
-  IProfessor,
-  IProfessorBase,
-  ProfessorBaseSchema,
-} from "./database/zod/professor.schema";
+import { ProfessorBaseSchema } from "./database/zod/professor.schema";
 import { AppEnvs } from "./core/read-env";
 
 interface Invitee {
@@ -286,6 +284,124 @@ export async function cancelScheduledEvent(
   }
 }
 
+export async function inviteUserToCalendlyAndCreateProfessor(
+  formData: IProfessorBase
+) {
+  try {
+    // Step 1: Get the Organization URI
+    const organizationUri = await getOrganizationUri();
+
+    // Step 2: Send Invite to Calendly API
+    const inviteResponse = await fetch(`${organizationUri}/invitations`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${AppEnvs.NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: formData.email,
+      }),
+    });
+
+    if (!inviteResponse.ok) {
+      const errorDetails = await inviteResponse.text();
+      throw new Error(
+        `Error sending invite: ${inviteResponse.status} - ${inviteResponse.statusText}: ${errorDetails}`
+      );
+    }
+
+    // Step 3: Create Professor Entry
+    const professorRepo = new ProfessorRepository(drizzleAdapter);
+    const createdProfessor = await professorRepo.create(formData);
+
+    return createdProfessor;
+  } catch (error) {
+    console.error("Error inviting user and creating professor:", error);
+    throw error;
+  } finally {
+    revalidatePath("/admin/professors");
+    redirect("/admin/professors");
+  }
+}
+
+export async function checkInvitationAndUpdateCalendlyLink(email: string) {
+  try {
+    // Step 1: Get the organization URI
+    const organizationUri = await getOrganizationUri();
+    const organizationId = organizationUri.split("/").pop(); // Extracting the UUID from the URI
+
+    // Step 2: Fetch invitations filtered by email
+    const invitationsResponse = await fetch(
+      `https://api.calendly.com/organizations/${organizationId}/invitations?email=${encodeURIComponent(
+        email
+      )}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${AppEnvs.NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!invitationsResponse.ok) {
+      throw new Error(
+        `Error fetching invitations: ${invitationsResponse.statusText}`
+      );
+    }
+
+    const invitationsData = await invitationsResponse.json();
+    const invitation = invitationsData.collection[0]; // Assuming we're interested in the first invitation
+
+    // Step 3: Check if the invitation status is accepted
+    if (invitation && invitation.status === "accepted") {
+      // Step 4: Fetch user details using the user URI from the invitation
+      const userResponse = await fetch(invitation.user, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${AppEnvs.NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!userResponse.ok) {
+        throw new Error(`Error fetching user: ${userResponse.statusText}`);
+      }
+
+      const userData = await userResponse.json();
+      const calendlyLink = userData.resource.scheduling_url; // Extracting the Calendly link
+
+      // Step 5: Fetch the professor from your database by email
+      const professor = await professorRepo.getByEmail(email);
+
+      if (professor) {
+        // Step 6: Update the professor with the Calendly link
+        await professorRepo.update(professor.id, {
+          ...professor,
+          calendlyLink: calendlyLink,
+        });
+        return {
+          success: true,
+          message: "Calendly link updated successfully.",
+        };
+      } else {
+        throw new Error("Professor not found in the database.");
+      }
+    } else {
+      return {
+        success: false,
+        message: "Invitation not accepted or not found.",
+      };
+    }
+  } catch (error) {
+    console.error("Error in checkInvitationAndUpdateCalendlyLink:", error);
+    throw error;
+  } finally {
+    revalidatePath("/admin/professors");
+  }
+}
+
+
 export async function registerUser(prevState: any, formData: FormData) {
   const user: IMemberBase = {
     name: formData.get("name") as string,
@@ -429,6 +545,8 @@ export async function fetchProfessorsList(params: IPageRequest) {
   } catch (err) {
     console.error("Error in fetching member", error);
     throw new Error("Falid to fetch members");
+  } finally {
+    revalidatePath("/admin/professors");
   }
 }
 

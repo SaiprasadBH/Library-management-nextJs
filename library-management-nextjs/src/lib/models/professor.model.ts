@@ -3,7 +3,7 @@ export interface IProfessorBase {
   email: string;
   department?: string | null;
   bio?: string | null;
-  calendlyLink: string | null;
+  calendlyLink?: string | null;
 }
 
 export interface IProfessor extends IProfessorBase {
