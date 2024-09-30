@@ -425,10 +425,11 @@ export async function checkInvitationAndUpdateCalendlyLink(email: string) {
 export async function fetchMembershipUuid(email: string) {
   try {
     console.log("email while deleting", email);
+    const orgUri = await getOrganizationUri();
     const response = await fetch(
-      `https://api.calendly.com/organization_memberships?email=${encodeURIComponent(
-        email
-      )}`,
+      `https://api.calendly.com/organization_memberships?organization=${encodeURIComponent(
+        orgUri
+      )}&email=${encodeURIComponent(email)}`,
       {
         method: "GET",
         headers: {
@@ -444,7 +445,7 @@ export async function fetchMembershipUuid(email: string) {
 
     const data = await response.json();
     const membership = data.collection[0]; // Assuming the first entry is the required one
-    return membership.uuid;
+    return membership.uri.split("/").pop();
   } catch (error) {
     console.error("Error fetching membership UUID", error);
     throw error;
@@ -459,6 +460,7 @@ export async function removeProfessorFromOrganization(professorId: number) {
 
     // Step 2: Fetch the organization membership UUID from Calendly
     const membershipUuid = await fetchMembershipUuid(professor.email);
+    console.log("uuid:......................:", membershipUuid);
 
     // Step 3: Call the Calendly API to remove the professor from the organization
     const response = await fetch(
@@ -473,9 +475,7 @@ export async function removeProfessorFromOrganization(professorId: number) {
     );
 
     if (!response.ok) {
-      throw new Error(
-        `Failed to remove professor from organization: ${response.statusText}`
-      );
+      throw new Error(`Failed to remove professor from organization:`);
     }
 
     // Step 4: After successful deletion, remove the professor from the database
@@ -492,6 +492,8 @@ export async function removeProfessorFromOrganization(professorId: number) {
       success: false,
       error: error.message || "Failed to remove professor",
     };
+  } finally {
+    revalidatePath("/admin/professors");
   }
 }
 
