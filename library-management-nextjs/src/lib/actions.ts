@@ -36,6 +36,12 @@ import { use } from "react";
 import { ProfessorRepository } from "./repositories/professor.repository";
 import { ProfessorBaseSchema } from "./database/zod/professor.schema";
 import { AppEnvs } from "./core/read-env";
+import Razorpay from "razorpay";
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID!, // Store these in your .env.local
+  key_secret: process.env.RAZORPAY_KEY_SECRET!,
+});
 
 interface Invitee {
   email: string;
@@ -86,6 +92,21 @@ export async function authenticate(
       }
     }
     throw error;
+  }
+}
+
+export async function createOrder(professorId: number) {
+  const options = {
+    amount: 10100,
+    currency: "INR",
+    receipt: `order_rcptid_${professorId}`,
+  };
+
+  try {
+    const order = await razorpay.orders.create(options);
+    return order;
+  } catch (error) {
+    throw new Error("Failed to create Razorpay order");
   }
 }
 
@@ -401,6 +422,78 @@ export async function checkInvitationAndUpdateCalendlyLink(email: string) {
   }
 }
 
+export async function fetchMembershipUuid(email: string) {
+  try {
+    console.log("email while deleting", email);
+    const response = await fetch(
+      `https://api.calendly.com/organization_memberships?email=${encodeURIComponent(
+        email
+      )}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${AppEnvs.NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error fetching membership UUID: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const membership = data.collection[0]; // Assuming the first entry is the required one
+    return membership.uuid;
+  } catch (error) {
+    console.error("Error fetching membership UUID", error);
+    throw error;
+  }
+}
+
+export async function removeProfessorFromOrganization(professorId: number) {
+  try {
+    // Step 1: Fetch the professor from the database to get their email or UUID
+    const professor = await professorRepo.getById(professorId);
+    if (!professor) throw new Error("Professor not found");
+
+    // Step 2: Fetch the organization membership UUID from Calendly
+    const membershipUuid = await fetchMembershipUuid(professor.email);
+
+    // Step 3: Call the Calendly API to remove the professor from the organization
+    const response = await fetch(
+      `https://api.calendly.com/organization_memberships/${membershipUuid}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_CALENDLY_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to remove professor from organization: ${response.statusText}`
+      );
+    }
+
+    // Step 4: After successful deletion, remove the professor from the database
+    const deletedProfessor = await professorRepo.delete(professorId);
+
+    return {
+      success: true,
+      message: "Professor successfully removed from organization and database",
+      deletedProfessor,
+    };
+  } catch (error: any) {
+    console.error("Error removing professor:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to remove professor",
+    };
+  }
+}
 
 export async function registerUser(prevState: any, formData: FormData) {
   const user: IMemberBase = {
@@ -927,5 +1020,39 @@ export async function switchUserRoles(id: number, role: string) {
     return { error: "Failed to update the role" };
   } finally {
     revalidatePath("/admin/members/");
+  }
+}
+
+export async function updateProfessor(data: {
+  id: number;
+  name: string;
+  department?: string | null;
+  bio?: string | null;
+}) {
+  try {
+    const professor = await professorRepo.getById(data.id);
+    if (!professor) {
+      return {
+        success: false,
+        error: "Failed to fetch professor details while updating",
+      };
+    }
+    const updatedProfessor = await professorRepo.update(data.id, {
+      ...professor,
+      name: data.name,
+      department: data.department,
+      bio: data.bio,
+    });
+
+    return {
+      success: true,
+      error: "",
+    };
+  } catch (error) {
+    console.error("Failed to update professor", error);
+    return {
+      success: false,
+      error: (error as Error).message || "Failed to update professor",
+    };
   }
 }

@@ -16,7 +16,6 @@ export default async function ProfessorAppointment({
   params: { id: string };
 }) {
   const professorId = Number(params.id);
-  console.log("professorId", professorId);
   const professorRepo = new ProfessorRepository(drizzleAdapter);
   const professor = await professorRepo.getById(professorId);
   const memberRepo = new MemberRepository(drizzleAdapter);
