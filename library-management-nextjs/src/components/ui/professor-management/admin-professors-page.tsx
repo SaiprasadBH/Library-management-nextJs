@@ -23,6 +23,7 @@ import {
 import { DeleteButton } from "@/components/ui/customButtons";
 import Link from "next/link";
 import { InviteProfessorModal } from "./invite-professor-modal";
+import { EditProfessorModal } from "./edit-professor-form";
 import { checkInvitationAndUpdateCalendlyLink } from "@/lib/actions";
 import { toast } from "@/components/hooks/use-toast";
 import { Search } from "../search";
@@ -39,13 +40,14 @@ export default function ProfessorsPage({
   query: string;
 }) {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [editingProfessor, setEditingProfessor] = useState<IProfessor | null>(
+    null
+  );
   const [refreshingProfessor, setRefreshingProfessor] = useState<number | null>(
     null
   );
 
   const router = useRouter();
-
-  const limit = 8;
 
   const handleRefreshProfessor = async (professorId: number, email: string) => {
     setRefreshingProfessor(professorId);
@@ -158,13 +160,13 @@ export default function ProfessorsPage({
                           />
                           <span className="sr-only">Refresh</span>
                         </Button>
-                        <Link
-                          href={`/admin/professors/edit/${professor.id}`}
+                        <Button
+                          onClick={() => setEditingProfessor(professor)}
                           className="p-2 text-teal-400 hover:text-teal-300 transition-colors"
                         >
                           <PencilIcon className="h-5 w-5" />
                           <span className="sr-only">Edit</span>
-                        </Link>
+                        </Button>
                         <DeleteButton
                           type="professor"
                           id={professor.id}
@@ -196,6 +198,18 @@ export default function ProfessorsPage({
           router.refresh();
         }}
       />
+
+      {editingProfessor && (
+        <EditProfessorModal
+          isOpen={!!editingProfessor}
+          onClose={() => setEditingProfessor(null)}
+          professor={editingProfessor}
+          onSuccess={() => {
+            setEditingProfessor(null);
+            router.refresh();
+          }}
+        />
+      )}
     </div>
   );
 }

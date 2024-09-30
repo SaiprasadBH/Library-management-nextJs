@@ -21,6 +21,7 @@ import {
   deleteMember,
   deleteTransaction,
   rejectRequest,
+  removeProfessorFromOrganization,
   returnRequest,
   switchUserRoles,
 } from "@/lib/actions";
@@ -56,6 +57,8 @@ export const DeleteButton = ({
       await deleteMember(id);
     } else if (type === "transaction") {
       await deleteTransaction(id);
+    } else if (type === "professor") {
+      await removeProfessorFromOrganization(id);
     }
 
     setIsOpen(false);

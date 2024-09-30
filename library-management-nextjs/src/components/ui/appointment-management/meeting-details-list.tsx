@@ -16,6 +16,7 @@ import {
 import CalendlyModal from "@/components/ui/appointment-management/calendly-reschedule";
 import { IMember } from "@/lib/definitions";
 import CancellationModal from "./calendly-cancellation";
+import { useRouter } from "next/navigation";
 
 interface Person {
   name: string;
@@ -45,6 +46,7 @@ export default function MeetingDetailsList({
     null
   );
   const [cancelEvent, setCancelEvent] = useState<MeetingEvent | null>(null);
+  const router = useRouter();
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -223,14 +225,20 @@ export default function MeetingDetailsList({
         <CalendlyModal
           url={rescheduleEvent.invitees[0]?.reschedule_url || ""}
           isOpen={!!rescheduleEvent}
-          onClose={() => setRescheduleEvent(null)}
+          onClose={() => {
+            setRescheduleEvent(null);
+            router.refresh();
+          }}
         />
       )}
       {cancelEvent && (
         <CalendlyModal
           url={cancelEvent.invitees[0]?.cancel_url || ""}
           isOpen={!!cancelEvent}
-          onClose={() => setCancelEvent(null)}
+          onClose={() => {
+            setCancelEvent(null);
+            router.refresh();
+          }}
         />
       )}
     </div>
