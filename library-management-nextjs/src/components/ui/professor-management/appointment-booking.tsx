@@ -31,7 +31,7 @@ export default function BookAppointment({
                 <p className="text-gray-400 mb-4">{professor.bio}</p>
               </div>
               <Link
-                href={`/user/pay/${professor.id}`}
+                href={`/user/appointments/${professor.id}`}
                 className="w-full bg-gradient-to-r from-teal-400 to-cyan-300 text-gray-900 font-bold py-2 px-4 rounded-md hover:from-teal-500 hover:to-cyan-400 transition-all duration-300 flex items-center justify-center mt-auto"
               >
                 <Calendar className="w-5 h-5 mr-2" />

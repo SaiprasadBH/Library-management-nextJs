@@ -53,6 +53,25 @@ export class MemberRepository implements IRepository<IMemberBase, IMember> {
     return deletedMember;
   }
 
+  async updateWallet(memberId: number, amount: number): Promise<void> {
+    try {
+      const db = await this.dbConnFactory.getConnection();
+
+      // Fetch current wallet balance
+      const member = await this.getById(memberId);
+      if (!member) throw new Error("Member not found");
+
+      // Update wallet with the new amount
+      const newWalletBalance = member.wallet + amount;
+      await db
+        .update(members)
+        .set({ wallet: newWalletBalance })
+        .where(eq(members.id, memberId));
+    } catch (error) {
+      throw new Error("Falied to update member wallet:");
+    }
+  }
+
   async getById(memberId: number): Promise<IMember | undefined> {
     const db = await this.dbConnFactory.getConnection();
     const [selectedMember] = await db

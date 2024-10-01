@@ -4,6 +4,7 @@ export interface IMemberBase {
   email: string;
   address: string;
   password: string;
+  wallet: number;
   role: "admin" | "user";
 }
 export interface IMember extends IMemberBase {

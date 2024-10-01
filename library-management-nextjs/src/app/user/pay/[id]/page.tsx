@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import PaymentPageClient from "@/components/ui/payment-management/payment-client";
 import { drizzleAdapter } from "@/lib/database/drizzle-orm/drizzleMysqlAdapter";
+import { MemberRepository } from "@/lib/repositories/member.repository";
 import { ProfessorRepository } from "@/lib/repositories/professor.repository";
 
 export default async function PaymentPage({
@@ -8,11 +9,10 @@ export default async function PaymentPage({
 }: {
   params: { id: string };
 }) {
-  const session = await auth();
-  const professorRepo = new ProfessorRepository(drizzleAdapter);
-  const professor = await professorRepo.getById(Number(params.id));
+  const memberRepo = new MemberRepository(drizzleAdapter);
+  const member = await memberRepo.getById(Number(params.id));
 
-  if (!session || !session.user || !professor) {
+  if (!member) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 flex items-center justify-center px-4">
         <div className="text-white text-2xl font-bold">
@@ -22,11 +22,5 @@ export default async function PaymentPage({
     );
   }
 
-  return (
-    <PaymentPageClient
-      professor={professor}
-      userName={session.user.name || ""}
-      userEmail={session.user.email || ""}
-    />
-  );
+  return <PaymentPageClient member={member} />;
 }

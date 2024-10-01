@@ -26,8 +26,7 @@ export const books = pgTable("books", {
   imageURL: varchar("imageURL", { length: 255 }),
 });
 
-// Members Table
-
+// Enums
 export const roleEnum = pgEnum("role", ["user", "admin"]);
 export const statusEnum = pgEnum("bookStatus", [
   "returned",
@@ -36,6 +35,7 @@ export const statusEnum = pgEnum("bookStatus", [
   "rejected",
 ]);
 
+// Members Table
 export const members = pgTable(
   "members",
   {
@@ -45,6 +45,7 @@ export const members = pgTable(
     email: varchar("email", { length: 255 }).notNull(),
     address: varchar("address", { length: 35 }).notNull(),
     password: varchar("password", { length: 255 }).notNull(),
+    wallet: integer("wallet").notNull().default(0), // Added default value for wallet
     role: roleEnum("role").notNull(),
   },
   (members) => {
@@ -67,6 +68,7 @@ export const transactions = pgTable("transactions", {
   dateOfIssue: varchar("dateOfIssue", { length: 15 }),
 });
 
+// Professors Table
 export const professors = pgTable(
   "professors",
   {
@@ -76,6 +78,7 @@ export const professors = pgTable(
     department: varchar("department", { length: 50 }),
     bio: varchar("bio", { length: 255 }),
     calendlyLink: varchar("calendlyLink", { length: 255 }),
+    wallet: integer("wallet").notNull().default(0), // Added default value for wallet
   },
   (professors) => {
     return {
@@ -83,3 +86,16 @@ export const professors = pgTable(
     };
   }
 );
+
+export const payments = pgTable("payments", {
+  id: serial("id").primaryKey(), // Primary key
+  memberId: bigint("memberId", { mode: "bigint" }) // Foreign key to members table
+    .references(() => members.id, { onDelete: "cascade" })
+    .notNull(),
+  professorId: bigint("professorId", { mode: "bigint" }) // Foreign key to professors table
+    .references(() => professors.id, { onDelete: "cascade" })
+    .notNull(),
+  transactionId: varchar("transactionId", { length: 50 }).notNull(), // Unique transaction ID
+  orderId: varchar("orderId", { length: 50 }).notNull(), // Unique order ID
+  amount: integer("amount").notNull(), // Payment amount
+});

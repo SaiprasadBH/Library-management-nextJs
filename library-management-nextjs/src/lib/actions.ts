@@ -95,17 +95,18 @@ export async function authenticate(
   }
 }
 
-export async function createOrder(professorId: number) {
+export async function createOrder(memberId: number, amount: number) {
   const options = {
-    amount: 10100,
+    amount: amount * 100, // Convert to paise
     currency: "INR",
-    receipt: `order_rcptid_${professorId}`,
+    receipt: `order_rcptid_${memberId}`,
   };
 
   try {
     const order = await razorpay.orders.create(options);
     return order;
   } catch (error) {
+    console.error("Error creating Razorpay order:", error);
     throw new Error("Failed to create Razorpay order");
   }
 }
@@ -447,7 +448,6 @@ export async function fetchMembershipUuid(email: string) {
     const membership = data.collection[0]; // Assuming the first entry is the required one
 
     return membership.uri.split("/").pop();
-
   } catch (error) {
     console.error("Error fetching membership UUID", error);
     throw error;
@@ -463,7 +463,6 @@ export async function removeProfessorFromOrganization(professorId: number) {
     // Step 2: Fetch the organization membership UUID from Calendly
     const membershipUuid = await fetchMembershipUuid(professor.email);
     console.log("uuid:......................:", membershipUuid);
-
 
     // Step 3: Call the Calendly API to remove the professor from the organization
     const response = await fetch(
@@ -495,10 +494,18 @@ export async function removeProfessorFromOrganization(professorId: number) {
       success: false,
       error: error.message || "Failed to remove professor",
     };
-
   } finally {
     revalidatePath("/admin/professors");
+  }
+}
 
+export async function updateUserWallet(id: number, amount: number) {
+  try {
+    await memberRepo.updateWallet(id, amount);
+
+    return { success: "Wallet updated successfully" };
+  } catch (error) {
+    return { error: "Facing issue,failed to update wallet" };
   }
 }
 
@@ -510,6 +517,7 @@ export async function registerUser(prevState: any, formData: FormData) {
     address: formData.get("address") as string,
     password: formData.get("password") as string,
     role: "user",
+    wallet: 0,
   };
 
   try {
@@ -715,24 +723,27 @@ export async function updateMember(
   prevState: any,
   formData: FormData
 ) {
-  let newPassword;
-  if (!formData.get("password")) {
-    const user = await memberRepo.getByEmail(formData.get("email") as string);
-    newPassword = user?.password;
-  } else {
-    newPassword = await hashPassword(formData.get("password") as string);
-  }
-
-  const member: IMemberBase = {
-    name: formData.get("name") as string,
-    age: Number(formData.get("age")),
-    email: formData.get("email") as string,
-    address: formData.get("address") as string,
-    password: newPassword!,
-    role: "user",
-  };
-
   try {
+    let newPassword;
+    const user = await memberRepo.getByEmail(formData.get("email") as string);
+    if (!formData.get("password")) {
+      newPassword = user?.password;
+    } else {
+      newPassword = await hashPassword(formData.get("password") as string);
+    }
+    if (!user) {
+      throw new Error("The selected user does'nt exist in database");
+    }
+
+    const member: IMemberBase = {
+      name: formData.get("name") as string,
+      age: Number(formData.get("age")),
+      email: formData.get("email") as string,
+      address: formData.get("address") as string,
+      password: newPassword!,
+      role: "user",
+      wallet: user?.wallet,
+    };
     const response = await memberRepo.update(id, member);
 
     if (!response) {
@@ -840,6 +851,7 @@ export async function createMember(prevState: any, formData: FormData) {
       address: formData.get("address") as string,
       password: await hashPassword(formData.get("password") as string),
       role: formData.get("role") as "admin" | "user",
+      wallet: 0,
     };
 
     const response = await memberRepo.create(member);
@@ -877,6 +889,7 @@ export async function createProfessor(prevState: any, formData: FormData) {
       department: validatedData.department,
       bio: validatedData.bio,
       calendlyLink: validatedData.calendlyLink,
+      wallet: 0,
     };
 
     const response = await professorRepo.create(professor);
@@ -1016,6 +1029,7 @@ export async function switchUserRoles(id: number, role: string) {
         age: user.age,
         password: user.password,
         role: updatedRole,
+        wallet: user.wallet,
       };
     }
     const result = await memberRepo.update(id, updatedUser);

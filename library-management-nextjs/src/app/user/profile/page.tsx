@@ -8,6 +8,9 @@ import MemberEditForm from "@/components/ui/member-management/member-edit-form";
 import UserSpecificRequests from "@/components/ui/transaction-management/filter-user-requests";
 import Image from "next/image";
 import { auth } from "@/auth";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 
 const EditProfile = async () => {
   const user = await getUserDetails();
@@ -27,7 +30,8 @@ const EditProfile = async () => {
             Your Profile
           </h1>
           <p className="mt-2 text-xl text-gray-300">
-            Manage your account details and view your transactions
+            Manage your account details, view your transactions, and manage your
+            wallet
           </p>
         </div>
 
@@ -51,6 +55,24 @@ const EditProfile = async () => {
                 {member?.name}
               </h2>
               <p className="text-gray-400">{member?.email}</p>
+
+              <Card className="w-full bg-gray-700 border-teal-400/20">
+                <CardHeader>
+                  <CardTitle className="text-xl font-semibold text-teal-400">
+                    Wallet
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-white">
+                    ₹{member?.wallet.toFixed(2)}
+                  </p>
+                  <Link href={`/user/pay/${member?.id}`} passHref>
+                    <Button className="mt-4 w-full bg-gradient-to-r from-teal-400 to-cyan-300 text-gray-900 hover:from-teal-500 hover:to-cyan-400">
+                      Add Money to Wallet
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
             </div>
             <div className="w-full lg:w-2/3 space-y-8">
               {member ? (
