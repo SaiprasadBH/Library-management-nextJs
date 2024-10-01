@@ -29,6 +29,7 @@ export function InviteProfessorModal({
     department: "",
     bio: "",
     calendlyLink: null,
+    wallet: 0,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
