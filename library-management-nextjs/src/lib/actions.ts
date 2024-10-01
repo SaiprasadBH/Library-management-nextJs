@@ -462,6 +462,7 @@ export async function removeProfessorFromOrganization(professorId: number) {
 
     // Step 2: Fetch the organization membership UUID from Calendly
     const membershipUuid = await fetchMembershipUuid(professor.email);
+    console.log("uuid:......................:", membershipUuid);
 
 
     // Step 3: Call the Calendly API to remove the professor from the organization
@@ -478,7 +479,6 @@ export async function removeProfessorFromOrganization(professorId: number) {
 
     if (!response.ok) {
       throw new Error(`Failed to remove professor from organization:`);
-
     }
 
     // Step 4: After successful deletion, remove the professor from the database

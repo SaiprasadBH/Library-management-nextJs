@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { toast } from "@/components/hooks/use-toast";
 import { createOrder } from "@/lib/actions";
+import { IProfessor } from "@/lib/definitions";
 
 interface TransactionDetails {
   professorId: number;
@@ -21,13 +22,13 @@ interface TransactionDetails {
 }
 
 interface PaymentPageClientProps {
-  professorId: number;
+  professor: IProfessor;
   userName: string;
   userEmail: string;
 }
 
 export default function PaymentPageClient({
-  professorId,
+  professor,
   userName,
   userEmail,
 }: PaymentPageClientProps) {
@@ -40,7 +41,7 @@ export default function PaymentPageClient({
   const handlePayNow = async () => {
     setLoading(true);
     try {
-      const order = await createOrder(professorId);
+      const order = await createOrder(professor.id);
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
@@ -49,7 +50,7 @@ export default function PaymentPageClient({
         order_id: order.id,
         handler: function (response: any) {
           setTransactionDetails({
-            professorId: professorId,
+            professorId: professor.id,
             paymentId: response.razorpay_payment_id,
             orderId: response.razorpay_order_id,
           });
@@ -104,16 +105,16 @@ export default function PaymentPageClient({
             <div className="space-y-6">
               <div className="flex justify-between items-center text-white text-xl">
                 <span className="font-medium">Consultation Fee</span>
-                <span className="font-bold">₹300</span>
+                <span className="font-bold">₹101</span>
               </div>
               <div className="flex justify-between items-center text-gray-400">
-                <span>Professor ID</span>
-                <span>{professorId}</span>
+                <span>Professor</span>
+                <span>{professor.name}</span>
               </div>
               <div className="border-t border-gray-700 pt-4">
                 <div className="flex justify-between items-center font-bold text-white text-2xl">
                   <span>Total</span>
-                  <span>₹300</span>
+                  <span>₹101</span>
                 </div>
               </div>
             </div>
@@ -164,7 +165,7 @@ export default function PaymentPageClient({
           ) : (
             <Button
               className="w-full bg-gradient-to-r from-teal-400 to-cyan-300 hover:from-teal-500 hover:to-cyan-400 text-gray-900 text-lg py-6"
-              onClick={() => router.push(`/user/appointments/${professorId}`)}
+              onClick={() => router.push(`/user/appointments/${professor.id}`)}
             >
               Continue To Select Booking Date
             </Button>
