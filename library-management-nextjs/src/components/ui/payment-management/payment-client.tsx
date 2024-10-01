@@ -11,53 +11,68 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "@/components/hooks/use-toast";
-import { createOrder } from "@/lib/actions";
-import { IProfessor } from "@/lib/definitions";
+import { createOrder, updateUserWallet } from "@/lib/actions";
+import { IMember, IProfessor } from "@/lib/definitions";
 
 interface TransactionDetails {
-  professorId: number;
+  memberId: number;
   paymentId: string;
   orderId: string;
 }
 
 interface PaymentPageClientProps {
-  professor: IProfessor;
-  userName: string;
-  userEmail: string;
+  member: IMember;
 }
 
-export default function PaymentPageClient({
-  professor,
-  userName,
-  userEmail,
-}: PaymentPageClientProps) {
+export default function PaymentPageClient({ member }: PaymentPageClientProps) {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
   const [transactionDetails, setTransactionDetails] =
     useState<TransactionDetails | null>(null);
+  const [amount, setAmount] = useState(101);
 
   const handlePayNow = async () => {
     setLoading(true);
     try {
-      const order = await createOrder(professor.id);
+      const order = await createOrder(member.id, amount);
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
         order_id: order.id,
-        handler: function (response: any) {
-          setTransactionDetails({
-            professorId: professor.id,
-            paymentId: response.razorpay_payment_id,
-            orderId: response.razorpay_order_id,
-          });
+        handler: async function (response: any) {
+          try {
+            setTransactionDetails({
+              memberId: member.id,
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+            });
+            const result = await updateUserWallet(member.id, amount);
+            if (result.success) {
+              toast({
+                title: "Success",
+                description: "Wallet updated successfully.",
+              });
+            } else {
+              throw new Error(result.error);
+            }
+          } catch (error) {
+            console.error("Error updating wallet:", error);
+            toast({
+              title: "Error",
+              description: "Failed to update wallet. Please try again.",
+              variant: "destructive",
+            });
+          }
         },
         prefill: {
-          name: userName,
-          email: userEmail,
+          name: member.name,
+          email: member.email,
         },
         theme: {
           color: "#0D9488",
@@ -87,6 +102,7 @@ export default function PaymentPageClient({
       document.body.removeChild(script);
     };
   }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 flex items-center justify-center p-4 sm:p-8">
       <Card className="w-full max-w-2xl bg-gray-800/50 backdrop-blur-xl border border-teal-500/20 shadow-2xl">
@@ -104,17 +120,30 @@ export default function PaymentPageClient({
           {!transactionDetails ? (
             <div className="space-y-6">
               <div className="flex justify-between items-center text-white text-xl">
-                <span className="font-medium">Consultation Fee</span>
-                <span className="font-bold">₹101</span>
+                <span className="font-medium">Add money to wallet</span>
+                <div className="flex items-center space-x-2">
+                  <Label htmlFor="amount" className="sr-only">
+                    Amount
+                  </Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    min="1"
+                    value={amount}
+                    onChange={(e) => setAmount(Number(e.target.value))}
+                    className="w-24 bg-gray-700 border-gray-600 text-white"
+                  />
+                  <span className="font-bold">₹</span>
+                </div>
               </div>
               <div className="flex justify-between items-center text-gray-400">
-                <span>Professor</span>
-                <span>{professor.name}</span>
+                <span>Member</span>
+                <span>{member.name}</span>
               </div>
               <div className="border-t border-gray-700 pt-4">
                 <div className="flex justify-between items-center font-bold text-white text-2xl">
                   <span>Total</span>
-                  <span>₹101</span>
+                  <span>₹{amount}</span>
                 </div>
               </div>
             </div>
@@ -125,9 +154,9 @@ export default function PaymentPageClient({
               </div>
               <div className="space-y-4">
                 <p className="text-gray-400 text-lg">
-                  Professor ID:{" "}
+                  Member ID:{" "}
                   <span className="font-medium text-white">
-                    {transactionDetails.professorId}
+                    {transactionDetails.memberId}
                   </span>
                 </p>
                 <p className="text-gray-400 text-lg">
@@ -151,7 +180,7 @@ export default function PaymentPageClient({
             <Button
               className="w-full bg-gradient-to-r from-teal-400 to-cyan-300 hover:from-teal-500 hover:to-cyan-400 text-gray-900 text-lg py-6"
               onClick={handlePayNow}
-              disabled={loading}
+              disabled={loading || amount < 1}
             >
               {loading ? (
                 <span className="flex items-center justify-center">
@@ -165,19 +194,11 @@ export default function PaymentPageClient({
           ) : (
             <Button
               className="w-full bg-gradient-to-r from-teal-400 to-cyan-300 hover:from-teal-500 hover:to-cyan-400 text-gray-900 text-lg py-6"
-              onClick={() => router.push(`/user/appointments/${professor.id}`)}
+              onClick={() => router.push(`/user/profile`)}
             >
-              Continue To Select Booking Date
+              Go to profile
             </Button>
           )}
-          <Button
-            variant="outline"
-            className="w-full text-gray-900 border-white hover:bg-gray-700 text-lg py-6"
-            onClick={() => router.push("/user/appointments")}
-          >
-            <ArrowLeft className="mr-2 h-5 w-5" />
-            Go Back to Professors
-          </Button>
         </CardFooter>
       </Card>
     </div>

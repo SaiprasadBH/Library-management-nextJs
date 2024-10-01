@@ -4,6 +4,7 @@ export interface IProfessorBase {
   department?: string | null;
   bio?: string | null;
   calendlyLink?: string | null;
+  wallet: number;
 }
 
 export interface IProfessor extends IProfessorBase {

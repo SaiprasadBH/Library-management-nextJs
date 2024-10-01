@@ -36,6 +36,13 @@
       "when": 1727409669194,
       "tag": "20240927040109_lame_steel_serpent",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1727757006790,
+      "tag": "20241001043006_spooky_firestar",
+      "breakpoints": true
     }
   ]
 }
