@@ -87,6 +87,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 password: await hashPassword("GooglePassword@123"),
                 role: "user",
                 address: "default address",
+                wallet: 0,
               };
               const result = await memberRepo.create(userDetails);
             }
